@@ -48,6 +48,7 @@ def seed_users():
         else:
             print(f"Updating Superuser: {super_email}")
             superuser.name = "Anees Chaudhary"
+            superuser.password = generate_password_hash(super_pass)
             superuser.role = "superuser"
 
         db.session.commit()
