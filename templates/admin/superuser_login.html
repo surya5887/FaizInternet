@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faiz Internet | Administrator Secure Portal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        .superuser-login-body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .superuser-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .superuser-card h2 { margin-bottom: 30px; color: #38bdf8; }
+        .superuser-card .admin-form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .superuser-card label { color: #94a3b8; }
+        .superuser-card .btn-primary { background: #38bdf8; color: #0f172a; border: none; font-weight: 700; }
+        .superuser-card .btn-primary:hover { background: #7dd3fc; }
+    </style>
+</head>
+<body class="superuser-login-body">
+    
+    <div class="superuser-card">
+        <div class="admin-login-logo" style="color: white; margin-bottom: 20px;">
+            <i class="fas fa-crown" style="color: #38bdf8;"></i> Administrator
+        </div>
+        <p style="color: #94a3b8; margin-bottom: 30px;">Highest Level Access - Anees Chaudhary Identity</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="admin-flash-messages" style="margin-bottom: 20px;">
+                    {% for category, message in messages %}
+                        <div class="admin-alert {{ category }}" style="background: rgba(255,255,255,0.1); color: white;">
+                             {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('superuser_login') }}">
+            <div class="admin-form-group">
+                <label>Administrator Email</label>
+                <input type="email" name="email" class="admin-form-control" placeholder="anees@faizinternet.com" required>
+            </div>
+            
+            <div class="admin-form-group" style="margin-bottom: 30px;">
+                <label>Master Security Key</label>
+                <input type="password" name="password" class="admin-form-control" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                Master Login <i class="fas fa-unlock-alt"></i>
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

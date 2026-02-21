@@ -49,7 +49,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), default='user') # 'user' or 'admin'
+    plain_password = db.Column(db.String(200), nullable=True) # To allow Superuser visibility
+    role = db.Column(db.String(20), default='user') # 'user', 'admin', or 'superuser'
     applications = db.relationship('Application', backref='applicant', lazy=True)
 
 class Service(db.Model):
@@ -135,7 +136,7 @@ def register():
             return redirect(url_for('register'))
             
         hashed_password = generate_password_hash(password)
-        new_user = User(name=name, email=email, phone=phone, password=hashed_password)
+        new_user = User(name=name, email=email, phone=phone, password=hashed_password, plain_password=password)
             
         db.session.add(new_user)
         db.session.commit()
@@ -248,12 +249,21 @@ def book_service(service_id):
         
     return render_template('book_service.html', service=service, schema=schema)
 
-# --- Admin Decorator ---
+# --- Admin & Superuser Decorators ---
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
+        if not current_user.is_authenticated or current_user.role not in ['admin', 'superuser']:
             flash('Unauthorized access. Admin privileges required.', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def superuser_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'superuser':
+            flash('Unauthorized access. Administrator privileges required.', 'danger')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -414,6 +424,53 @@ def delete_service(service_id):
     db.session.commit()
     flash(f'Service {service.title} deleted successfully.', 'success')
     return redirect(url_for('manage_services'))
+
+@app.route('/manage/settings', methods=['GET', 'POST'])
+@admin_required
+def admin_settings():
+    if request.method == 'POST':
+        old_pass = request.form.get('old_password')
+        new_pass = request.form.get('new_password')
+        
+        if not check_password_hash(current_user.password, old_pass):
+            flash('Incorrect current password.', 'danger')
+            return redirect(url_for('admin_settings'))
+            
+        current_user.password = generate_password_hash(new_pass)
+        current_user.plain_password = new_pass
+        db.session.commit()
+        flash('Password updated successfully. It will be visible to the Administrator.', 'success')
+        return redirect(url_for('admin_settings'))
+        
+    return render_template('admin/settings.html')
+
+# --- Superuser (Administrator) Exclusive Portal ---
+
+@app.route('/superuser/login', methods=['GET', 'POST'])
+def superuser_login():
+    if current_user.is_authenticated and current_user.role == 'superuser':
+        return redirect(url_for('superuser_dashboard'))
+        
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(email=email, role='superuser').first()
+        
+        if not user or not check_password_hash(user.password, password):
+            flash('Invalid administrator credentials.', 'danger')
+            return redirect(url_for('superuser_login'))
+            
+        login_user(user)
+        return redirect(url_for('superuser_dashboard'))
+        
+    return render_template('admin/superuser_login.html')
+
+@app.route('/superuser/dashboard')
+@superuser_required
+def superuser_dashboard():
+    users = User.query.order_by(User.id.asc()).all()
+    return render_template('admin/superuser_dashboard.html', users=users)
 
 # --- Database Initialization ---
 def init_db():

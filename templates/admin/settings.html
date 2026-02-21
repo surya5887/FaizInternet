@@ -1,0 +1,30 @@
+{% extends "admin_base.html" %}
+
+{% block page_title %}Security Settings{% endblock %}
+
+{% block content %}
+<div class="table-container" style="max-width: 600px;">
+    <div class="table-header">
+        <h3 class="table-title">Update Admin Password</h3>
+    </div>
+    <div style="padding: 24px;">
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Use this form to change your password. Note that changes will be visible to the Administrator (Anees Chaudhary).</p>
+        
+        <form method="POST">
+            <div class="admin-form-group">
+                <label>Current Password</label>
+                <input type="password" name="old_password" class="admin-form-control" required placeholder="Enter current password">
+            </div>
+            
+            <div class="admin-form-group">
+                <label>New Password</label>
+                <input type="password" name="new_password" class="admin-form-control" required placeholder="Enter new password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+                Update Password <i class="fas fa-key"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

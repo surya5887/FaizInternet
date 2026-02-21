@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Dashboard | Administrator Panel</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        .superuser-main { background-color: #0f172a; color: #f8fafc; min-height: 100vh; padding: 40px; }
+        .master-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .master-table-container { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; }
+        .master-table { width: 100%; border-collapse: collapse; }
+        .master-table th { background: rgba(56, 189, 248, 0.1); color: #38bdf8; text-align: left; padding: 15px 20px; font-size: 0.8rem; text-transform: uppercase; }
+        .master-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .pass-view { background: #1e293b; padding: 4px 8px; border-radius: 4px; font-family: monospace; color: #38bdf8; }
+        .back-link { color: #94a3b8; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body class="superuser-main">
+    
+    <div class="master-header">
+        <div>
+            <h1 style="color: white; font-size: 1.8rem; margin-bottom: 5px;"><i class="fas fa-crown" style="color: #38bdf8;"></i> Master Dashboard</h1>
+            <p style="color: #94a3b8;">Welcome Administrator, Anees Chaudhary. Overseeing all platform credentials.</p>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="{{ url_for('manage_dashboard') }}" class="back-link"><i class="fas fa-external-link-alt"></i> Go to Admin Panel</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="master-table-container">
+        <table class="master-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Email Address</th>
+                    <th>Account Role</th>
+                    <th>Real-time Password</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>#{{ user.id }}</td>
+                    <td style="font-weight: 600;">{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.role == 'superuser' %}
+                            <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">Superuser</span>
+                        {% elif user.role == 'admin' %}
+                            <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid #a855f7;">Admin</span>
+                        {% else %}
+                            <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid #94a3b8;">User</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="pass-view">{{ user.plain_password or 'N/A (Hashed Only)' }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 40px; padding: 20px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); color: #f59e0b; font-size: 0.9rem;">
+        <i class="fas fa-exclamation-triangle"></i> <strong>Confidential Data Warning:</strong> This portal displays plaintext passwords for administrative purposes at your request. Ensure account security remains paramount.
+    </div>
+
+</body>
+</html>
