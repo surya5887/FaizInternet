@@ -166,9 +166,24 @@
                 <div style="margin-top: 25px; padding: 15px 20px; background: rgba(100,255,218,0.05); border-radius: var(--border-radius-sm); border-left: 4px solid var(--accent-blue); display: flex; align-items: center;">
                     <i class="fa-solid fa-file-pdf" style="color: var(--accent-blue); font-size: 1.5rem; margin-right: 15px;"></i>
                     <strong style="color: var(--white); margin-right: 20px;">Attached Document:</strong>
-                    <a href="{{ url_for('static', filename='uploads/' + app.document_path) }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
-                        View / Download File
-                    </a>
+                    {% if supabase %}
+                        {% set signed_url = supabase.storage.from_('documents').create_signed_url(app.document_path, 3600) %}
+                        {% if signed_url and 'signedURL' in signed_url %}
+                            <a href="{{ signed_url['signedURL'] }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+                                View / Download securely
+                            </a>
+                        {% elif signed_url %}
+                            <a href="{{ signed_url }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+                                View / Download securely
+                            </a>
+                        {% else %}
+                            <span style="color: red; margin-left: 10px;">Failed to generate secure link</span>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('static', filename='uploads/' + app.document_path) }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+                            View / Download File
+                        </a>
+                    {% endif %}
                 </div>
                 {% endif %}
                 

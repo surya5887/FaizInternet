@@ -4,25 +4,37 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+import io
 from datetime import datetime
 import json
+from dotenv import load_dotenv
+from supabase import create_client, Client
 
 app = Flask(__name__)
+# Load environment variables
+load_dotenv()
+
 app.config['SECRET_KEY'] = 'faiz_internet_premium_secret_key'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Vercel Read-Only Filesystem Fix
-IS_VERCEL = os.environ.get('VERCEL') == '1'
-
-if IS_VERCEL:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/csc_premium.db'
-    UPLOAD_FOLDER = '/tmp/uploads'
+# Database Configuration (Use Supabase URL if available, else fallback to local SQLite)
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    # SQLAlchemy requires 'postgresql://' instead of 'postgres://' if that's how it's provided
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///csc_premium.db'
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'static', 'uploads')
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Supabase Storage Configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+supabase: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload
 
 db = SQLAlchemy(app)
@@ -205,16 +217,28 @@ def book_service(service_id):
         for field in schema:
             form_data[field['name']] = request.form.get(field['name'])
             
-        # Handle File Upload
+        # Handle File Upload to Supabase Storage
         doc_filename = None
         if 'document' in request.files:
             file = request.files['document']
             if file and file.filename != '':
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                 filename = secure_filename(f"{current_user.id}_{timestamp}_{file.filename}")
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                doc_filename = filename
+                
+                # Upload to Supabase Storage 'documents' bucket
+                if supabase:
+                    try:
+                        file_bytes = file.read()
+                        res = supabase.storage.from_('documents').upload(
+                            path=filename,
+                            file=file_bytes,
+                            file_options={"content-type": file.content_type}
+                        )
+                        doc_filename = filename
+                    except Exception as e:
+                        flash(f'Error uploading document: {str(e)}', 'danger')
+                else:
+                    flash('Storage is not configured.', 'danger')
 
         new_app = Application(
             user_id=current_user.id,
@@ -251,7 +275,7 @@ def admin_dashboard():
                 pass
         parsed_apps.append({'model': app, 'data': data})
         
-    return render_template('admin.html', applications=parsed_apps)
+    return render_template('admin.html', applications=parsed_apps, supabase=supabase)
 
 @app.route('/admin/update_status/<int:app_id>', methods=['POST'])
 @login_required
@@ -339,12 +363,10 @@ def init_db():
                 ))
             db.session.commit()
 
-if IS_VERCEL:
-    init_db()
-
+# If running on Vercel, init_db shouldn't be called directly at the bottom 
+# to avoid concurrent execution issues, but for local dev we do it.
 if __name__ == '__main__':
     # Initialize the database file upon start
-    if not os.path.exists('instance/csc_premium.db'):
-        init_db()
+    init_db()
     
     app.run(debug=True, port=5000)
