@@ -17,7 +17,7 @@ def seed_users():
             admin = User(
                 name="Usman Ali",
                 email=admin_email,
-                phone="0000000000",
+                phone="+91 9756520529",
                 password=generate_password_hash(admin_pass),
                 plain_password=admin_pass,
                 role="admin"
@@ -40,7 +40,7 @@ def seed_users():
             superuser = User(
                 name="Anees Chaudhary",
                 email=super_email,
-                phone="1111111111",
+                phone="",
                 password=generate_password_hash(super_pass),
                 plain_password=super_pass,
                 role="superuser"
