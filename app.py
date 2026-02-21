@@ -346,44 +346,6 @@ def admin_update_status(app_id):
     flash(f'Application #{app_id} status updated to {status}.', 'success')
     return redirect(url_for('manage_applications'))
 
-@app.route('/manage/users')
-@admin_required
-def manage_users():
-    users = User.query.order_by(User.id.desc()).all()
-    return render_template('admin/users.html', users=users)
-
-@app.route('/manage/users/<int:user_id>/role', methods=['POST'])
-@admin_required
-def update_user_role(user_id):
-    if user_id == current_user.id:
-        flash('You cannot change your own role.', 'warning')
-        return redirect(url_for('manage_users'))
-        
-    user = User.query.get_or_404(user_id)
-    new_role = request.form.get('role')
-    
-    if new_role in ['user', 'admin']:
-        user.role = new_role
-        db.session.commit()
-        flash(f'User {user.name} role updated to {new_role}.', 'success')
-        
-    return redirect(url_for('manage_users'))
-
-@app.route('/manage/users/<int:user_id>/delete', methods=['POST'])
-@admin_required
-def delete_user(user_id):
-    if user_id == current_user.id:
-        flash('You cannot delete your own account.', 'danger')
-        return redirect(url_for('manage_users'))
-        
-    user = User.query.get_or_404(user_id)
-    
-    Application.query.filter_by(user_id=user.id).delete()
-    db.session.delete(user)
-    db.session.commit()
-    flash(f'User {user.name} and their applications have been deleted.', 'success')
-    return redirect(url_for('manage_users'))
-
 @app.route('/manage/services')
 @admin_required
 def manage_services():

@@ -27,9 +27,6 @@
             <a href="{{ url_for('manage_applications') }}" class="nav-item {% if request.endpoint == 'manage_applications' %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> Applications
             </a>
-            <a href="{{ url_for('manage_users') }}" class="nav-item {% if request.endpoint == 'manage_users' %}active{% endif %}">
-                <i class="fas fa-users"></i> User Management
-            </a>
             <a href="{{ url_for('manage_services') }}" class="nav-item {% if request.endpoint == 'manage_services' %}active{% endif %}">
                 <i class="fas fa-cogs"></i> Service Manager
             </a>
