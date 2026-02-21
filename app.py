@@ -9,11 +9,18 @@ import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'faiz_internet_premium_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///csc_premium.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Setup Upload Folder
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'static', 'uploads')
+# Vercel Read-Only Filesystem Fix
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+if IS_VERCEL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/csc_premium.db'
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///csc_premium.db'
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'static', 'uploads')
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload
@@ -331,6 +338,9 @@ def init_db():
                     form_schema=json.dumps(s['schema'])
                 ))
             db.session.commit()
+
+if IS_VERCEL:
+    init_db()
 
 if __name__ == '__main__':
     # Initialize the database file upon start
