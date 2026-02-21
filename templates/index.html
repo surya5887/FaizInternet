@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <!-- Abstract Background Elements -->
+    <div class="hero-bg-blur top-left"></div>
+    <div class="hero-bg-blur bottom-right"></div>
+
+    <div class="container hero-inner">
+        <div class="hero-content">
+            <h2>Your <span>Gateway</span> to<br>Government Services</h2>
+            <p>Fast, Reliable and Secure Solutions<br>for Digital & Government Services</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('services') }}" class="btn btn-primary">Explore Services</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-secondary">Contact Us <i class="fa-solid fa-arrow-right" style="margin-left: 10px;"></i></a>
+            </div>
+        </div>
+        <div class="hero-graphic">
+             <img src="{{ url_for('static', filename='img/hero-image.png') }}" alt="Service Center">
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="services-section" style="padding: 100px 0; position: relative;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h4 style="color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 15px;">What We Offer</h4>
+            <h2 style="font-size: 3rem; color: var(--white);">Our Featured Services</h2>
+        </div>
+        
+        <div class="services-grid">
+            {% for service in services %}
+            <!-- Service Card -->
+            <div class="service-card">
+                <div class="card-icon">
+                    {% if service.icon_path.startswith('img/') %}
+                    <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}">
+                    {% else %}
+                    <i class="{{ service.icon_path }}"></i>
+                    {% endif %}
+                </div>
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.description }}</p>
+                <a href="{{ url_for('book_service', service_id=service.id) }}" class="btn-apply">Apply Now <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align: center; margin-top: 60px;">
+            <a href="{{ url_for('services') }}" class="btn btn-secondary" style="padding: 16px 40px;">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="why-choose-section">
+    <!-- Background Image with Fade Overlay -->
+    <div class="why-bg-image" style="background-image: url('{{ url_for('static', filename='img/shop.jpg') }}');"></div>
+    <div class="why-bg-overlay"></div>
+    
+    <div class="container why-inner">
+        <div class="why-content">
+            <h4 class="section-subtitle">Why Choose Faiz Internet</h4>
+            <h2 class="section-title">Excellence in Digital Services</h2>
+            <ul class="features-list">
+                <li>
+                    <div class="feature-icon pro"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="feature-text">
+                        <h4>Experienced Professionals</h4>
+                        <p>Expert staff ready to assist you with all types of services securely and efficiently.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="feature-icon fast"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="feature-text">
+                        <h4>Fast & Easy Processing</h4>
+                        <p>Quick and hassle-free applications and document processing without long waits.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="feature-icon secure"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="feature-text">
+                        <h4>Secure Transactions</h4>
+                        <p>Your personal data and payments are protected with top-notch security measures.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section" style="padding: 100px 0; text-align: center; position: relative;">
+    <div class="container">
+        <div class="premium-card" style="background: linear-gradient(135deg, rgba(17,34,64,0.9) 0%, rgba(10,25,47,0.95) 100%); border: 1px solid rgba(100,255,218,0.2); position: relative; overflow: hidden;">
+            <!-- Background glow -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,102,0,0.15) 0%, transparent 60%); pointer-events: none;"></div>
+            
+            <h2 style="font-size: 2.5rem; margin-bottom: 20px; position: relative; z-index: 2;">Ready to Get Started?</h2>
+            <p style="color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px; position: relative; z-index: 2;">Visit Faiz Internet Citizen Service Center today or register online to access our premium digital services securely and quickly.</p>
+            <div style="position: relative; z-index: 2; display: flex; justify-content: center; gap: 20px;">
+                <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">Create Account</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem;">Get Directions</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

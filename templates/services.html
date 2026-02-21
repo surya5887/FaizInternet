@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}All Services - Faiz Internet{% endblock %}
+
+{% block content %}
+<section style="background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%); color: var(--white); padding: 80px 0; text-align: center; border-bottom: 1px solid rgba(100, 255, 218, 0.1);">
+    <div class="container">
+        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 700; letter-spacing: -1px;">Our Digital <span style="color: var(--accent-blue);">Services</span></h1>
+        <p style="font-size: 1.2rem; color: var(--text-light); max-width: 600px; margin: 0 auto;">Comprehensive government and digital solutions, processed securely and efficiently.</p>
+    </div>
+</section>
+
+<section class="services-section" style="padding-top: 80px; padding-bottom: 80px; position: relative;">
+    <!-- Abstract background -->
+    <div style="position: absolute; top: 20%; left: -10%; width: 40%; height: 60%; background: radial-gradient(circle, rgba(100,255,218,0.05) 0%, transparent 60%); pointer-events: none; z-index: 0;"></div>
+    
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="services-grid">
+            {% for service in services %}
+            <div class="service-card">
+                <div class="card-icon">
+                    {% if service.icon_path.startswith('img/') %}
+                    <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}">
+                    {% else %}
+                    <i class="{{ service.icon_path }}"></i>
+                    {% endif %}
+                </div>
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.description }}</p>
+                <a href="{{ url_for('book_service', service_id=service.id) }}" class="btn-apply">Apply Now <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

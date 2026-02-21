@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Faiz Internet - Citizen Service Center{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+            <a href="{{ url_for('index') }}" class="logo">
+                <h1>FAIZ <span>INTERNET</span></h1>
+                <p>Citizen Service Center</p>
+            </a>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation" style="display: none; background: transparent; border: none; color: var(--white); font-size: 1.5rem; cursor: pointer;">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav class="nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('services') }}">Services</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="header-right">
+                <div class="contact-number">
+                    <i class="fa-solid fa-headset"></i> +91 98765 43210
+                </div>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-login"><i class="fa-solid fa-user-shield"></i> Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="btn-login" style="margin-left: 10px; border-color: rgba(255, 102, 0, 0.5); color: var(--accent-orange);">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-login">Login / Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <div class="container" style="padding-top: 20px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <style>
+                    .flash-message {
+                        padding: 15px; margin-bottom: 20px; border-radius: 8px; font-weight: 600; border-width: 1px; border-style: solid;
+                    }
+                    .flash-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+                    .flash-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+                </style>
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: rgba(10, 25, 47, 0.9); border-top: 1px solid rgba(100, 255, 218, 0.1); color: var(--text-light); padding: 50px 0; text-align: center; margin-top: auto;">
+        <div class="container">
+            <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 1.5rem; color: var(--white); margin-bottom: 5px;">FAIZ <span style="color: var(--accent-blue); font-weight: 300;">INTERNET</span></h2>
+                <p style="font-size: 0.9rem; letter-spacing: 1px;">CITIZEN SERVICE CENTER</p>
+            </div>
+            <p>&copy; 2026 Faiz Internet. Providing Digital Solutions Since 2020.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.querySelector('.mobile-menu-toggle');
+            const nav = document.querySelector('.nav');
+            const headerRight = document.querySelector('.header-right');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    nav.classList.toggle('active');
+                    headerRight.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

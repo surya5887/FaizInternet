@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Faiz Internet{% endblock %}
+
+{% block content %}
+<section style="padding: 100px 0 60px; text-align: center; position: relative;">
+    <!-- Abstract Background Elements (optional subtle glow) -->
+    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 60%; background: radial-gradient(circle, rgba(100,255,218,0.1) 0%, transparent 60%); filter: blur(60px); z-index: -1;"></div>
+    
+    <div class="container">
+        <h1 style="font-size: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: 15px; background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">About Faiz Internet</h1>
+        <p style="font-size: 1.2rem; color: var(--text-light);">Your trusted partner for all digital citizen services.</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 0 20px 100px; min-height: 50vh;">
+    <div class="premium-card" style="display: flex; gap: 50px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 300px;">
+            <h2 style="color: var(--white); margin-bottom: 20px; font-size: 2.5rem;">Who We Are</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-dark); margin-bottom: 20px;">
+                Faiz Internet is a premier Citizen Service Center dedicated to bridging the gap between government services and the common digital citizen. We understand that navigating bureaucratic processes can be daunting, which is why we offer a streamlined, hassle-free environment.
+            </p>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-dark);">
+                Our team of experienced professionals ensures that your applications for Aadhaar, PAN Cards, Passports, and various certificates are handled with the utmost care, security, and speed.
+            </p>
+        </div>
+        <div style="flex: 1; min-width: 300px; position: relative;">
+            <div style="position: absolute; inset: 0; background: var(--gradient-button); mix-blend-mode: overlay; opacity: 0.2; border-radius: 12px;"></div>
+            <img src="{{ url_for('static', filename='img/shop.jpg') }}" alt="Our Center" style="width: 100%; border-radius: 12px; box-shadow: var(--shadow-lg);">
+            <!-- Decorative corner -->
+            <div style="position: absolute; bottom: -20px; right: -20px; width: 100px; height: 100px; border-right: 4px solid var(--accent-blue); border-bottom: 4px solid var(--accent-blue); border-bottom-right-radius: 20px; z-index: -1;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
