@@ -41,7 +41,7 @@ def seed_users():
                 name="Anees Chaudhary",
                 email=super_email,
                 phone="",
-                password=super_pass,
+                password=generate_password_hash(super_pass),
                 role="superuser"
             )
             db.session.add(superuser)
