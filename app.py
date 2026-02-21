@@ -355,25 +355,33 @@ def manage_services():
 @app.route('/manage/services/add', methods=['POST'])
 @admin_required
 def add_service():
-    title = request.form.get('title')
-    description = request.form.get('description')
-    schema_str = request.form.get('form_schema') 
-    
-    if not title or not description:
-        flash('Title and description are required.', 'danger')
-        return redirect(url_for('manage_services'))
-        
     try:
-        if schema_str:
-            json.loads(schema_str)
-    except Exception as e:
-        flash(f'Invalid JSON schema: {e}', 'danger')
-        return redirect(url_for('manage_services'))
+        title = request.form.get('title')
+        description = request.form.get('description')
+        schema_str = request.form.get('form_schema') 
         
-    new_service = Service(title=title, description=description, form_schema=schema_str)
-    db.session.add(new_service)
-    db.session.commit()
-    flash('New service added successfully.', 'success')
+        if not title or not description:
+            flash('Title and description are required.', 'danger')
+            return redirect(url_for('manage_services'))
+            
+        if schema_str and schema_str.strip():
+            try:
+                json.loads(schema_str)
+            except Exception as e:
+                flash(f'Invalid JSON schema: {e}', 'danger')
+                return redirect(url_for('manage_services'))
+        else:
+            schema_str = None # Ensure it's None if blank
+            
+        new_service = Service(title=title, description=description, form_schema=schema_str)
+        db.session.add(new_service)
+        db.session.commit()
+        flash('New service added successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error adding service: {str(e)}', 'danger')
+        print(f"DEBUG ERROR: {e}")
+        
     return redirect(url_for('manage_services'))
 
 @app.route('/manage/services/<int:service_id>/delete', methods=['POST'])
