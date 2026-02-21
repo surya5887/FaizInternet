@@ -1,0 +1,92 @@
+{% extends "admin_base.html" %}
+
+{% block page_title %}Service Manager{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Active Services</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Manage services visible on the public frontend.</p>
+        </div>
+        <button class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('active')">
+            <i class="fas fa-plus"></i> Add Service
+        </button>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title & Description</th>
+                    <th>Form Schema Logic</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for svc in services %}
+                <tr>
+                    <td>#{{ svc.id }}</td>
+                    <td>
+                        <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">{{ svc.title }}</strong>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">{{ svc.description }}</span>
+                    </td>
+                    <td>
+                        {% if svc.form_schema %}
+                            <span class="badge success"><i class="fas fa-code"></i> Dynamic Form Attached</span>
+                        {% else %}
+                            <span class="badge user">No Custom Form</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete_service', service_id=svc.id) }}" onsubmit="return confirm('Are you sure you want to delete this service? All associated applications will also be deleted.');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash-alt"></i> Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        No services found. Add one to get started.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal" id="addServiceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Deploy New Service</h3>
+            <i class="fas fa-times close-btn" onclick="document.getElementById('addServiceModal').classList.remove('active')"></i>
+        </div>
+        <form method="POST" action="{{ url_for('add_service') }}">
+            <div class="modal-body">
+                <div class="admin-form-group">
+                    <label>Service Title</label>
+                    <input type="text" name="title" class="admin-form-control" required placeholder="e.g. Passport Renewal">
+                </div>
+                <div class="admin-form-group">
+                    <label>Short Description</label>
+                    <textarea name="description" class="admin-form-control" rows="2" required placeholder="Brief detail about the service..."></textarea>
+                </div>
+                <div class="admin-form-group" style="margin-bottom: 0;">
+                    <label>Form Schema (JSON Array)</label>
+                    <textarea name="form_schema" class="admin-form-control" rows="5" placeholder='[{"name": "field_id", "label": "Full Name", "type": "text", "required": true}]'></textarea>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Leave blank for default file upload only. Provide valid JSON array for dynamic forms.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addServiceModal').classList.remove('active')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Deploy Service</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

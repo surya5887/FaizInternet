@@ -1,0 +1,62 @@
+{% extends "admin_base.html" %}
+
+{% block page_title %}Platform Overview{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <p>Total Users</p>
+            <h3>{{ total_users }}</h3>
+        </div>
+        <div class="stat-icon primary">
+            <i class="fas fa-users"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-info">
+            <p>Pending Apps</p>
+            <h3>{{ pending_applications }}</h3>
+        </div>
+        <div class="stat-icon warning">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-info">
+            <p>Total Handled</p>
+            <h3>{{ total_applications }}</h3>
+        </div>
+        <div class="stat-icon success">
+            <i class="fas fa-file-signature"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-info">
+            <p>Active Services</p>
+            <h3>{{ total_services }}</h3>
+        </div>
+        <div class="stat-icon danger">
+            <i class="fas fa-server"></i>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">Quick Actions</h3>
+    </div>
+    <div style="padding: 24px;">
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Use the sidebar navigation to manage specific sectors of the platform.</p>
+        
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <a href="{{ url_for('manage_applications') }}" class="btn btn-primary"><i class="fas fa-file-alt"></i> Process Applications</a>
+            <a href="{{ url_for('manage_users') }}" class="btn btn-outline"><i class="fas fa-user-shield"></i> Manage Roles</a>
+            <a href="{{ url_for('manage_services') }}" class="btn btn-outline"><i class="fas fa-plus"></i> Add New Service</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

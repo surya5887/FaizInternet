@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from functools import wraps
 import os
 import io
 from datetime import datetime
@@ -135,10 +136,6 @@ def register():
             
         hashed_password = generate_password_hash(password)
         new_user = User(name=name, email=email, phone=phone, password=hashed_password)
-        
-        # Make first user admin automatically for testing
-        if User.query.count() == 0:
-            new_user.role = 'admin'
             
         db.session.add(new_user)
         db.session.commit()
@@ -165,8 +162,6 @@ def login():
             
         login_user(user)
         
-        if user.role == 'admin':
-            return redirect(url_for('admin_dashboard'))
         return redirect(url_for('dashboard'))
         
     return render_template('login.html')
@@ -182,8 +177,6 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    if current_user.role == 'admin':
-        return redirect(url_for('admin_dashboard'))
     applications = Application.query.filter_by(user_id=current_user.id).order_by(Application.created_at.desc()).all()
     
     # Parse JSON data before sending to template
@@ -255,46 +248,172 @@ def book_service(service_id):
         
     return render_template('book_service.html', service=service, schema=schema)
 
-# --- Admin Routes ---
-@app.route('/admin')
-@login_required
-def admin_dashboard():
-    if current_user.role != 'admin':
-        flash('Unauthorized access.', 'danger')
-        return redirect(url_for('dashboard'))
+# --- Admin Decorator ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash('Unauthorized access. Admin privileges required.', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- Premium Admin Portal Routes ---
+
+@app.route('/manage/login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated and current_user.role == 'admin':
+        return redirect(url_for('manage_dashboard'))
         
-    applications = Application.query.order_by(Application.created_at.desc()).all()
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if not user or not check_password_hash(user.password, password):
+            flash('Invalid admin credentials.', 'danger')
+            return redirect(url_for('admin_login'))
+            
+        if user.role != 'admin':
+            flash('Access denied. You do not have admin permissions.', 'danger')
+            return redirect(url_for('admin_login'))
+            
+        login_user(user)
+        return redirect(url_for('manage_dashboard'))
+        
+    return render_template('admin/login.html')
+
+@app.route('/manage/logout')
+@login_required
+def admin_logout():
+    logout_user()
+    return redirect(url_for('admin_login'))
+
+@app.route('/manage/dashboard')
+@admin_required
+def manage_dashboard():
+    total_users = User.query.filter_by(role='user').count()
+    total_services = Service.query.count()
+    total_applications = Application.query.count()
+    pending_applications = Application.query.filter_by(status='Pending').count()
     
+    return render_template('admin/dashboard.html', 
+                           total_users=total_users,
+                           total_services=total_services,
+                           total_applications=total_applications,
+                           pending_applications=pending_applications)
+
+@app.route('/manage/applications')
+@admin_required
+def manage_applications():
+    applications = Application.query.order_by(Application.created_at.desc()).all()
     parsed_apps = []
-    for app in applications:
+    for app_item in applications:
         data = None
-        if app.submitted_data:
+        if app_item.submitted_data:
             try:
-                data = json.loads(app.submitted_data)
+                data = json.loads(app_item.submitted_data)
             except:
                 pass
-        parsed_apps.append({'model': app, 'data': data})
+        parsed_apps.append({'model': app_item, 'data': data})
         
-    return render_template('admin.html', applications=parsed_apps, supabase=supabase)
+    return render_template('admin/applications.html', applications=parsed_apps, supabase=supabase)
 
-@app.route('/admin/update_status/<int:app_id>', methods=['POST'])
-@login_required
-def update_status(app_id):
-    if current_user.role != 'admin':
-        return redirect(url_for('index'))
-        
+@app.route('/manage/applications/<int:app_id>/status', methods=['POST'])
+@admin_required
+def admin_update_status(app_id):
     application = Application.query.get_or_404(app_id)
     status = request.form.get('status')
     notes = request.form.get('admin_notes')
     
     if status in ['Pending', 'Processing', 'Completed', 'Rejected']:
         application.status = status
-    if notes:
+    if notes is not None:
         application.admin_notes = notes
         
     db.session.commit()
-    flash(f'Application #{app_id} updated successfully.', 'success')
-    return redirect(url_for('admin_dashboard'))
+    flash(f'Application #{app_id} status updated to {status}.', 'success')
+    return redirect(url_for('manage_applications'))
+
+@app.route('/manage/users')
+@admin_required
+def manage_users():
+    users = User.query.order_by(User.id.desc()).all()
+    return render_template('admin/users.html', users=users)
+
+@app.route('/manage/users/<int:user_id>/role', methods=['POST'])
+@admin_required
+def update_user_role(user_id):
+    if user_id == current_user.id:
+        flash('You cannot change your own role.', 'warning')
+        return redirect(url_for('manage_users'))
+        
+    user = User.query.get_or_404(user_id)
+    new_role = request.form.get('role')
+    
+    if new_role in ['user', 'admin']:
+        user.role = new_role
+        db.session.commit()
+        flash(f'User {user.name} role updated to {new_role}.', 'success')
+        
+    return redirect(url_for('manage_users'))
+
+@app.route('/manage/users/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    if user_id == current_user.id:
+        flash('You cannot delete your own account.', 'danger')
+        return redirect(url_for('manage_users'))
+        
+    user = User.query.get_or_404(user_id)
+    
+    Application.query.filter_by(user_id=user.id).delete()
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'User {user.name} and their applications have been deleted.', 'success')
+    return redirect(url_for('manage_users'))
+
+@app.route('/manage/services')
+@admin_required
+def manage_services():
+    services = Service.query.all()
+    return render_template('admin/services.html', services=services)
+
+@app.route('/manage/services/add', methods=['POST'])
+@admin_required
+def add_service():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    schema_str = request.form.get('form_schema') 
+    
+    if not title or not description:
+        flash('Title and description are required.', 'danger')
+        return redirect(url_for('manage_services'))
+        
+    try:
+        if schema_str:
+            json.loads(schema_str)
+    except Exception as e:
+        flash(f'Invalid JSON schema: {e}', 'danger')
+        return redirect(url_for('manage_services'))
+        
+    new_service = Service(title=title, description=description, form_schema=schema_str)
+    db.session.add(new_service)
+    db.session.commit()
+    flash('New service added successfully.', 'success')
+    return redirect(url_for('manage_services'))
+
+@app.route('/manage/services/<int:service_id>/delete', methods=['POST'])
+@admin_required
+def delete_service(service_id):
+    service = Service.query.get_or_404(service_id)
+    
+    Application.query.filter_by(service_id=service.id).delete()
+    db.session.delete(service)
+    db.session.commit()
+    flash(f'Service {service.title} deleted successfully.', 'success')
+    return redirect(url_for('manage_services'))
 
 # --- Database Initialization ---
 def init_db():

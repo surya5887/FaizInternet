@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faiz Internet | Secure Admin Login</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-login-body">
+    
+    <div class="admin-login-card">
+        <div class="admin-login-logo">
+            <i class="fas fa-shield-alt"></i> Faiz Admin
+        </div>
+        <p>Restricted Area. Authorized Personnel Only.</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="admin-flash-messages" style="margin-bottom: 20px;">
+                    {% for category, message in messages %}
+                        <div class="admin-alert {{ category }}">
+                            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <div class="admin-form-group">
+                <label for="email">Admin Email Identity</label>
+                <input type="email" id="email" name="email" class="admin-form-control" placeholder="admin@faizinternet.com" required autocomplete="email">
+            </div>
+            
+            <div class="admin-form-group" style="margin-bottom: 30px;">
+                <label for="password">Security Identifier (Password)</label>
+                <input type="password" id="password" name="password" class="admin-form-control" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                Authenticate <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
