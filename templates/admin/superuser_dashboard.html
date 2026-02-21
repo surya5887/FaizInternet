@@ -8,70 +8,221 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Admin CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
     <style>
-        .superuser-main { background-color: #0f172a; color: #f8fafc; min-height: 100vh; padding: 40px; }
-        .master-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .master-table-container { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; }
+        :root {
+            --primary: #38bdf8;
+            --bg-dark: #0f172a;
+            --surface: #1e293b;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header Section */
+        .master-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-info h1 {
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .header-info h1 i { color: var(--primary); }
+        .header-info p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: var(--text-muted); }
+
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Table Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+        }
+
+        .table-responsive { overflow-x: auto; }
+
         .master-table { width: 100%; border-collapse: collapse; }
-        .master-table th { background: rgba(56, 189, 248, 0.1); color: #38bdf8; text-align: left; padding: 15px 20px; font-size: 0.8rem; text-transform: uppercase; }
-        .master-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .pass-view { background: #1e293b; padding: 4px 8px; border-radius: 4px; font-family: monospace; color: #38bdf8; }
-        .back-link { color: #94a3b8; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
-        .back-link:hover { color: white; }
+        
+        .master-table th {
+            background: rgba(255,255,255,0.02);
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .master-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .master-table tr:last-child td { border-bottom: none; }
+        .master-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-super { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-admin { background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .badge-user { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .pass-code {
+            background: #0f172a;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Warning Box */
+        .warning-box {
+            margin-top: 30px;
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            color: #f59e0b;
+        }
+
+        .warning-box i { font-size: 1.25rem; margin-top: 2px; }
+        .warning-box p { font-size: 0.9rem; line-height: 1.5; }
+
+        @media (max-width: 768px) {
+            .master-header { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
-<body class="superuser-main">
+<body>
     
-    <div class="master-header">
-        <div>
-            <h1 style="color: white; font-size: 1.8rem; margin-bottom: 5px;"><i class="fas fa-crown" style="color: #38bdf8;"></i> Master Dashboard</h1>
-            <p style="color: #94a3b8;">Welcome Administrator, Anees Chaudhary. Overseeing all platform credentials.</p>
-        </div>
-        <div style="display: flex; gap: 20px; align-items: center;">
-            <a href="{{ url_for('manage_dashboard') }}" class="back-link"><i class="fas fa-external-link-alt"></i> Go to Admin Panel</a>
-            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </div>
-    </div>
+    <div class="container">
+        <header class="master-header">
+            <div class="header-info">
+                <h1><i class="fas fa-crown"></i> Master Dashboard</h1>
+                <p>Anees Chaudhary (Administrator) — Security Overlook</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('manage_dashboard') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Admin Panel
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </header>
 
-    <div class="master-table-container">
-        <table class="master-table">
-            <thead>
-                <tr>
-                    <th>User ID</th>
-                    <th>Full Name</th>
-                    <th>Email Address</th>
-                    <th>Account Role</th>
-                    <th>Real-time Password</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>#{{ user.id }}</td>
-                    <td style="font-weight: 600;">{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        {% if user.role == 'superuser' %}
-                            <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">Superuser</span>
-                        {% elif user.role == 'admin' %}
-                            <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid #a855f7;">Admin</span>
-                        {% else %}
-                            <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid #94a3b8;">User</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="pass-view">{{ user.plain_password or 'N/A (Hashed Only)' }}</span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table class="master-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Identity Role</th>
+                            <th>Current Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td style="color: var(--text-muted);">#{{ user.id }}</td>
+                            <td style="font-weight: 600;">{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.role == 'superuser' %}
+                                    <span class="badge badge-super">SUPERUSER</span>
+                                {% elif user.role == 'admin' %}
+                                    <span class="badge badge-admin">ADMIN</span>
+                                {% else %}
+                                    <span class="badge badge-user">USER</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="pass-code">{{ user.plain_password or '••••••••' }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <div style="margin-top: 40px; padding: 20px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); color: #f59e0b; font-size: 0.9rem;">
-        <i class="fas fa-exclamation-triangle"></i> <strong>Confidential Data Warning:</strong> This portal displays plaintext passwords for administrative purposes at your request. Ensure account security remains paramount.
+        <div class="warning-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Confidential Access:</strong>
+                <p>Aap is portal par har user ke real password dekh rahe hain kyuki iska access sirf Anees Chaudhary (Owner) ke paas hai. Kripya is hardware security ka khayal rakhein aur kisi ke saath credentials share na karein.</p>
+            </div>
+        </div>
     </div>
 
 </body>
