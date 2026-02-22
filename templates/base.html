@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Faiz Internet - Citizen Service Center{% endblock %}</title>
+    <title>{% block title %}Faiz Internet - Common Service Centre{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +17,10 @@
     <header class="header">
         <div class="container header-inner" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
             <a href="{{ url_for('index') }}" class="logo" style="display: flex; align-items: center; gap: 15px; text-decoration: none;">
-                <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet Logo" style="height: 60px; width: auto; filter: drop-shadow(0 0 8px rgba(100,255,218,0.3));">
+                <img src="{{ url_for('static', filename='img/faiz_logo.jpg') }}" alt="Faiz Internet Logo" style="height: 60px; width: auto; filter: drop-shadow(0 0 8px rgba(100,255,218,0.3));">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: 1px;">FAIZ <span style="color: var(--accent-blue);">INTERNET</span></h1>
-                    <p style="margin: 0; font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px;">Citizen Service Center</p>
+                    <p style="margin: 0; font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px;">Common Service Centre</p>
                 </div>
             </a>
             
@@ -80,7 +80,7 @@
     <footer style="background: rgba(10, 25, 47, 0.9); border-top: 1px solid rgba(100, 255, 218, 0.1); color: var(--text-light); padding: 50px 0; text-align: center; margin-top: auto;">
         <div class="container">
             <div style="margin-bottom: 30px;">
-                <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet" style="height: 80px; width: auto; margin-bottom: 20px;">
+                <img src="{{ url_for('static', filename='img/faiz_logo.jpg') }}" alt="Faiz Internet" style="height: 80px; width: auto; margin-bottom: 20px;">
                 <h2 style="font-size: 1.5rem; color: var(--white); margin-bottom: 5px;">FAIZ <span style="color: var(--accent-blue); font-weight: 300;">INTERNET</span></h2>
                 <p style="font-size: 0.8rem; letter-spacing: 2px; color: var(--text-light);">AUTHENTICATED DIGITAL SERVICE PROVIDER</p>
             </div>
@@ -89,10 +89,10 @@
             <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px;">
                 <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: var(--accent-blue); margin-bottom: 20px;">Our Official Affiliations & Validated Portals</p>
                 <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; opacity: 0.8;">
-                    <img src="{{ url_for('static', filename='img/csc_logo.png') }}" alt="CSC" style="height: 50px; filter: grayscale(1) invert(1) brightness(2);">
-                    <img src="{{ url_for('static', filename='img/aadhaar_logo.png') }}" alt="Aadhaar" style="height: 50px; filter: grayscale(1) invert(1) brightness(2);">
-                    <img src="{{ url_for('static', filename='img/edistrict_logo.png') }}" alt="eDistrict" style="height: 50px; filter: grayscale(1) invert(1) brightness(2);">
-                    <img src="{{ url_for('static', filename='img/voter_logo.png') }}" alt="Voter Portal" style="height: 50px; filter: grayscale(1) invert(1) brightness(2);">
+                    <img src="{{ url_for('static', filename='img/csc_logo.jpg') }}" alt="CSC" style="height: 50px;">
+                    <img src="{{ url_for('static', filename='img/aadhaar_logo.jpg') }}" alt="Aadhaar" style="height: 50px;">
+                    <img src="{{ url_for('static', filename='img/edistrict_logo.jpg') }}" alt="eDistrict" style="height: 50px;">
+                    <img src="{{ url_for('static', filename='img/voter_logo.jpg') }}" alt="Voter Portal" style="height: 50px;">
                 </div>
             </div>
 
