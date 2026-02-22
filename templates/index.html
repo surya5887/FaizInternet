@@ -22,9 +22,32 @@
     </div>
 </section>
 
-<!-- Services Section -->
-<section class="services-section" style="padding: 100px 0; position: relative;">
-    <div class="container">
+ 
+ <!-- Services Section -->
+ <section class="services-section" style="padding: 100px 0; position: relative;">
++    <!-- Partner Trust Bar -->
++    <div class="container" style="margin-bottom: 80px;">
++        <div style="display: flex; justify-content: space-around; align-items: center; gap: 30px; flex-wrap: wrap; padding: 30px; background: rgba(255,102,0,0.05); border-radius: 20px; border: 1px solid rgba(255,102,0,0.1);">
++            <div style="text-align: center;">
++                <img src="{{ url_for('static', filename='img/csc_logo.png') }}" alt="CSC" style="height: 60px; object-fit: contain; margin-bottom: 10px;">
++                <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--accent-orange);">CSC Center</p>
++            </div>
++            <div style="text-align: center;">
++                <img src="{{ url_for('static', filename='img/aadhaar_logo.png') }}" alt="Aadhaar" style="height: 60px; object-fit: contain; margin-bottom: 10px;">
++                <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--accent-orange);">Aadhaar Authorised</p>
++            </div>
++            <div style="text-align: center;">
++                <img src="{{ url_for('static', filename='img/edistrict_logo.png') }}" alt="eDistrict" style="height: 60px; object-fit: contain; margin-bottom: 10px;">
++                <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--accent-orange);">eDistrict UP</p>
++            </div>
++            <div style="text-align: center;">
++                <img src="{{ url_for('static', filename='img/voter_logo.png') }}" alt="Voter" style="height: 60px; object-fit: contain; margin-bottom: 10px;">
++                <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--accent-orange);">Voter Services</p>
++            </div>
++        </div>
++    </div>
++
+     <div class="container">
         <div style="text-align: center; margin-bottom: 60px;">
             <h4 style="color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 15px;">What We Offer</h4>
             <h2 style="font-size: 3rem; color: var(--white);">Our Featured Services</h2>
