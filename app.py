@@ -281,7 +281,9 @@ def book_service(service_id):
         # Collect dynamic form data
         form_data = {}
         for field in schema:
-            form_data[field['name']] = request.form.get(field['name'])
+            field_name = field.get('name')
+            if field_name:
+                form_data[field_name] = request.form.get(field_name)
         
         # Handle legacy single file upload
         doc_filename = None

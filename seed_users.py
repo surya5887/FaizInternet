@@ -7,7 +7,7 @@ load_dotenv()
 
 def seed_users():
     with app.app_context():
-        # 1. Admin: Usman Ali
+        # Admin: Usman Ali
         admin_email = "usmanali@faizinternet.com"
         admin_pass = "admin@9756"
         
@@ -30,9 +30,9 @@ def seed_users():
             admin.plain_password = admin_pass
             admin.role = "admin"
 
-        # 2. Superuser: Anees Chaudhary
+        
         super_email = "anees@faizinternet.com"
-        super_pass = "super@123" # Default, suggest user to change this
+        super_pass = "super@123"
         
         superuser = User.query.filter_by(email=super_email).first()
         if not superuser:

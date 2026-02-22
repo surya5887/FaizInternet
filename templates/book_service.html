@@ -119,22 +119,22 @@
                 <div class="grid-form">
                     {% if schema %}
                         {% for field in schema %}
-                            <div class="form-group {% if field.type == 'textarea' %}full-width{% endif %}">
-                                <label for="{{ field.name }}">{{ field.label }} {% if field.required %}<span style="color:var(--accent-orange);">*</span>{% endif %}</label>
+                            <div class="form-group {% if field.get('type') == 'textarea' %}full-width{% endif %}">
+                                <label for="{{ field.get('name', 'field_' ~ loop.index0) }}">{{ field.get('label', 'Field') }} {% if field.get('required') %}<span style="color:var(--accent-orange);">*</span>{% endif %}</label>
                                 
-                                {% if field.type == 'textarea' %}
-                                    <textarea id="{{ field.name }}" name="{{ field.name }}" class="form-control" rows="3" {% if field.required %}required{% endif %}></textarea>
-                                {% elif field.type == 'date' %}
-                                    <input type="date" id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
-                                {% elif field.type == 'select' %}
-                                    <select id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
+                                {% if field.get('type') == 'textarea' %}
+                                    <textarea id="{{ field.get('name') }}" name="{{ field.get('name') }}" class="form-control" rows="3" {% if field.get('required') %}required{% endif %}></textarea>
+                                {% elif field.get('type') == 'date' %}
+                                    <input type="date" id="{{ field.get('name') }}" name="{{ field.get('name') }}" class="form-control" {% if field.get('required') %}required{% endif %}>
+                                {% elif field.get('type') == 'select' %}
+                                    <select id="{{ field.get('name') }}" name="{{ field.get('name') }}" class="form-control" {% if field.get('required') %}required{% endif %}>
                                         <option value="">-- Select --</option>
                                         {% for opt in field.get('options', []) %}
                                         <option value="{{ opt }}">{{ opt }}</option>
                                         {% endfor %}
                                     </select>
                                 {% else %}
-                                    <input type="{{ field.type }}" id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
+                                    <input type="{{ field.get('type', 'text') }}" id="{{ field.get('name') }}" name="{{ field.get('name') }}" class="form-control" {% if field.get('required') %}required{% endif %}>
                                 {% endif %}
                             </div>
                         {% endfor %}
@@ -153,16 +153,16 @@
                     <div class="doc-upload-field premium-card" style="padding: 25px; background: rgba(155, 93, 229, 0.03);">
                         <label style="font-size: 1.1rem; margin-bottom: 15px;">
                             <i class="fa-solid fa-file-shield" style="color: var(--accent-purple);"></i>
-                            {{ doc_field.label }} 
-                            {% if doc_field.required %}
+                            {{ doc_field.get('label', 'Document') }} 
+                            {% if doc_field.get('required') %}
                                 <span class="badge" style="background: rgba(255, 107, 53, 0.15); color: var(--accent-orange); font-size: 0.7rem; margin-left: 8px;">REQUIRED</span>
                             {% endif %}
                         </label>
 
-                        {% if doc_field.sub_inputs and doc_field.sub_inputs|length > 0 %}
+                        {% if doc_field.get('sub_inputs') and doc_field.get('sub_inputs')|length > 0 %}
                             <!-- Multi-part Upload (e.g. Front & Back) -->
                             <div class="multi-upload-grid">
-                                {% for sub_label in doc_field.sub_inputs %}
+                                {% for sub_label in doc_field.get('sub_inputs') %}
                                 <div class="sub-input-group">
                                     <span class="sub-input-label">{{ sub_label }}</span>
                                     <div class="stylish-upload-container" onclick="this.querySelector('input').click()">
@@ -173,7 +173,7 @@
                                         <span class="upload-text-sub">or drag & drop</span>
                                         <input type="file" name="doc_{{ loop.parent.index0 }}_{{ loop.index0 }}" 
                                                class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
-                                               {% if doc_field.required %}required{% endif %}
+                                               {% if doc_field.get('required') %}required{% endif %}
                                                onchange="handlePreview(this)">
                                         <div class="file-preview-area">
                                             <i class="fa-solid fa-circle-check"></i>
@@ -193,7 +193,7 @@
                                 <span class="upload-text-sub">PDF, JPG, or PNG (Max 16MB)</span>
                                 <input type="file" name="doc_field_{{ loop.index0 }}" 
                                        class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
-                                       {% if doc_field.required %}required{% endif %}
+                                       {% if doc_field.get('required') %}required{% endif %}
                                        onchange="handlePreview(this)">
                                 <div class="file-preview-area">
                                     <i class="fa-solid fa-circle-check"></i>
