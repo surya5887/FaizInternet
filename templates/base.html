@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% block extra_css %}{% endblock %}
 </head>
@@ -17,10 +17,10 @@
     <header class="header">
         <div class="container header-inner" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
             <a href="{{ url_for('index') }}" class="logo" style="display: flex; align-items: center; gap: 15px; text-decoration: none;">
-                <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet Logo" style="height: 60px; width: auto; filter: drop-shadow(0 0 8px rgba(100,255,218,0.3));">
+                <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet Logo" style="height: 55px; width: auto;">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: 1px;">FAIZ <span style="color: var(--accent-blue);">INTERNET</span></h1>
-                    <p style="margin: 0; font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px;">Common Service Centre</p>
+                    <p style="margin: 0; font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 3px;">Common Service Centre</p>
                 </div>
             </a>
             
@@ -57,10 +57,10 @@
             {% if messages %}
                 <style>
                     .flash-message {
-                        padding: 15px; margin-bottom: 20px; border-radius: 8px; font-weight: 600; border-width: 1px; border-style: solid;
+                        padding: 15px; margin-bottom: 20px; border-radius: 12px; font-weight: 600; border-width: 1px; border-style: solid; backdrop-filter: blur(10px);
                     }
-                    .flash-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-                    .flash-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+                    .flash-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+                    .flash-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
                 </style>
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }} flash-message flash-{{ category }}">
@@ -76,27 +76,117 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer style="background: rgba(10, 25, 47, 0.9); border-top: 1px solid rgba(100, 255, 218, 0.1); color: var(--text-light); padding: 50px 0; text-align: center; margin-top: auto;">
-        <div class="container">
-            <div style="margin-bottom: 30px;">
-                <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet" style="height: 80px; width: auto; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem; color: var(--white); margin-bottom: 5px;">FAIZ <span style="color: var(--accent-blue); font-weight: 300;">INTERNET</span></h2>
-                <p style="font-size: 0.8rem; letter-spacing: 2px; color: var(--text-light);">COMMON SERVICE CENTRE</p>
-            </div>
-            
-            <!-- Partner Logos Section -->
-            <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px;">
-                <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: var(--accent-blue); margin-bottom: 20px;">Our Official Affiliations & Validated Portals</p>
-                <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; opacity: 0.8;">
-                    <img src="{{ url_for('static', filename='img/csc_logo.jpg') }}" alt="CSC" style="height: 50px;">
-                    <img src="{{ url_for('static', filename='img/aadhaar_logo.jpg') }}" alt="Aadhaar" style="height: 50px;">
-                    <img src="{{ url_for('static', filename='img/edistrict_logo.jpg') }}" alt="eDistrict" style="height: 50px;">
-                    <img src="{{ url_for('static', filename='img/voter_logo.jpg') }}" alt="Voter Portal" style="height: 50px;">
+    <!-- ==================== PREMIUM FOOTER ==================== -->
+    <footer class="premium-footer">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <!-- Column 1: Brand & About -->
+                    <div class="footer-col footer-brand">
+                        <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet" class="footer-logo">
+                        <h3>FAIZ <span>INTERNET</span></h3>
+                        <p class="footer-tagline">Common Service Centre</p>
+                        <p class="footer-desc">Your trusted partner for all digital and government services. We bring government to your doorstep with speed, security, and care.</p>
+                        <div class="footer-social">
+                            <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                            <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                            <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Quick Links -->
+                    <div class="footer-col">
+                        <h4>Quick Links</h4>
+                        <ul class="footer-links">
+                            <li><a href="{{ url_for('index') }}"><i class="fa-solid fa-chevron-right"></i> Home</a></li>
+                            <li><a href="{{ url_for('services') }}"><i class="fa-solid fa-chevron-right"></i> Services</a></li>
+                            <li><a href="{{ url_for('about') }}"><i class="fa-solid fa-chevron-right"></i> About Us</a></li>
+                            <li><a href="{{ url_for('contact') }}"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
+                            <li><a href="{{ url_for('login') }}"><i class="fa-solid fa-chevron-right"></i> Login / Register</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Column 3: Our Services -->
+                    <div class="footer-col">
+                        <h4>Our Services</h4>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Aadhaar Card</a></li>
+                            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> PAN Card</a></li>
+                            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> eDistrict</a></li>
+                            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Voter ID</a></li>
+                            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Passport</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Column 4: Contact & Map -->
+                    <div class="footer-col footer-contact-col">
+                        <h4>Contact Info</h4>
+                        <ul class="footer-contact-list">
+                            <li>
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>Maiz Bazar, Asara,<br>Uttar Pradesh, India</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-phone"></i>
+                                <span>+91 9837957711</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-envelope"></i>
+                                <span>contact@faizinternet.com</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-clock"></i>
+                                <span>Mon - Sat: 9AM - 8PM</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <p style="font-size: 0.9rem;">&copy; 2026 Faiz Internet. Providing Digital Solutions Since 2020.</p>
+        <!-- Partner Logos Row -->
+        <div class="footer-partners">
+            <div class="container">
+                <p class="partners-label">Our Official Affiliations & Validated Portals</p>
+                <div class="partners-logos">
+                    <img src="{{ url_for('static', filename='img/csc_logo.jpg') }}" alt="CSC">
+                    <img src="{{ url_for('static', filename='img/aadhaar_logo.jpg') }}" alt="Aadhaar">
+                    <img src="{{ url_for('static', filename='img/edistrict_logo.jpg') }}" alt="eDistrict">
+                    <img src="{{ url_for('static', filename='img/voter_logo.jpg') }}" alt="Voter Portal">
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Maps Section -->
+        <div class="footer-map">
+            <div class="container">
+                <div class="map-wrapper">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3510.123456789!2d78.0!3d28.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDMwJzAwLjAiTiA3OMKwMDAnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890"
+                        width="100%" 
+                        height="250" 
+                        style="border:0; border-radius: 16px; filter: brightness(0.8) contrast(1.2) saturate(0.5);" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright Bar -->
+        <div class="footer-copyright">
+            <div class="container">
+                <p>&copy; 2026 Faiz Internet. All Rights Reserved. Providing Digital Solutions Since 2020.</p>
+            </div>
+        </div>
+
+        <!-- Developer Credit -->
+        <div class="footer-developer">
+            <div class="container">
+                <p>Designed & Developed By <strong>Anees Chaudhary</strong> Asara <a href="tel:+919837957711">+91 9837957711</a></p>
+            </div>
         </div>
     </footer>
 
