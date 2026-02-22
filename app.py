@@ -312,33 +312,65 @@ def book_service(service_id):
         db.session.add(new_app)
         db.session.commit()
         
-        # Handle multiple document uploads
+        # Handle multiple document uploads (Nested & Stylish)
         for i, doc_field in enumerate(doc_fields):
-            field_name = f"doc_field_{i}"
-            if field_name in request.files:
-                file = request.files[field_name]
-                if file and file.filename != '':
-                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                    fname = secure_filename(f"{current_user.id}_{new_app.id}_{timestamp}_{file.filename}")
-                    if supabase:
-                        try:
-                            file_bytes = file.read()
-                            supabase.storage.from_('documents').upload(
-                                path=fname,
-                                file=file_bytes,
-                                file_options={"content-type": file.content_type}
-                            )
-                            new_doc = ApplicationDocument(
-                                application_id=new_app.id,
-                                filename=fname,
-                                original_name=file.filename,
-                                doc_label=doc_field.get('label', f'Document {i+1}'),
-                                uploaded_by='user',
-                                doc_type='request'
-                            )
-                            db.session.add(new_doc)
-                        except Exception as e:
-                            flash(f'Error uploading {doc_field.get("label", "document")}: {str(e)}', 'danger')
+            sub_inputs = doc_field.get('sub_inputs', [])
+            
+            if sub_inputs and len(sub_inputs) > 0:
+                # Handle sub-inputs (e.g. Front/Back)
+                for j, sub_label in enumerate(sub_inputs):
+                    field_name = f"doc_{i}_{j}"
+                    if field_name in request.files:
+                        file = request.files[field_name]
+                        if file and file.filename != '':
+                            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                            fname = secure_filename(f"{current_user.id}_{new_app.id}_{timestamp}_{j}_{file.filename}")
+                            if supabase:
+                                try:
+                                    file_bytes = file.read()
+                                    supabase.storage.from_('documents').upload(
+                                        path=fname,
+                                        file=file_bytes,
+                                        file_options={"content-type": file.content_type}
+                                    )
+                                    new_doc = ApplicationDocument(
+                                        application_id=new_app.id,
+                                        filename=fname,
+                                        original_name=file.filename,
+                                        doc_label=f"{doc_field['label']} - {sub_label}",
+                                        uploaded_by='user',
+                                        doc_type='request'
+                                    )
+                                    db.session.add(new_doc)
+                                except Exception as e:
+                                    flash(f'Error uploading {sub_label}: {str(e)}', 'danger')
+            else:
+                # Handle single document input
+                field_name = f"doc_field_{i}"
+                if field_name in request.files:
+                    file = request.files[field_name]
+                    if file and file.filename != '':
+                        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                        fname = secure_filename(f"{current_user.id}_{new_app.id}_{timestamp}_{file.filename}")
+                        if supabase:
+                            try:
+                                file_bytes = file.read()
+                                supabase.storage.from_('documents').upload(
+                                    path=fname,
+                                    file=file_bytes,
+                                    file_options={"content-type": file.content_type}
+                                )
+                                new_doc = ApplicationDocument(
+                                    application_id=new_app.id,
+                                    filename=fname,
+                                    original_name=file.filename,
+                                    doc_label=doc_field.get('label', f'Document {i+1}'),
+                                    uploaded_by='user',
+                                    doc_type='request'
+                                )
+                                db.session.add(new_doc)
+                            except Exception as e:
+                                flash(f'Error uploading {doc_field.get("label", "document")}: {str(e)}', 'danger')
         
         db.session.commit()
         flash(f'Your application for {service.title} has been submitted successfully!', 'success')

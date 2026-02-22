@@ -153,21 +153,48 @@ function addModalFieldRow(data = {label: '', type: 'text', required: true}) {
     container.appendChild(row);
 }
 
-function addModalDocRow(data = {label: '', required: true}) {
+function addModalDocRow(data = {label: '', required: true, sub_inputs: []}) {
     const container = document.getElementById('modal-doc-fields');
     const row = document.createElement('div');
-    row.className = 'builder-row';
-    row.style.gridTemplateColumns = "2fr 60px 40px";
+    row.className = 'm-builder-row-container';
+    row.style.marginBottom = '15px';
+    row.style.padding = '10px';
+    row.style.background = 'rgba(255,255,255,0.03)';
+    row.style.borderRadius = '10px';
+    
     row.innerHTML = `
-        <input type="text" class="admin-form-control m-doc-label" value="${data.label}" placeholder="Doc Name" oninput="syncModalJSON()">
-        <label class="builder-check">
-            <input type="checkbox" class="m-doc-req" ${data.required?'checked':''} onchange="syncModalJSON()">
-        </label>
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
+        <div class="builder-row" style="grid-template-columns: 2fr 60px 40px; margin-bottom: 8px;">
+            <input type="text" class="admin-form-control m-doc-label" value="${data.label}" placeholder="Doc Name" oninput="syncModalJSON()">
+            <label class="builder-check">
+                <input type="checkbox" class="m-doc-req" ${data.required?'checked':''} onchange="syncModalJSON()">
+            </label>
+            <div class="builder-remove" onclick="this.parentElement.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="sub-inputs-container" id="m-subs-${Date.now()}"></div>
+        <button type="button" class="btn-add-sub" onclick="addModalSubInput('${row.querySelector('.sub-inputs-container').id}')">
+            <i class="fas fa-plus"></i> Sub-Input (e.g. Back Side)
+        </button>
+    `;
+    container.appendChild(row);
+    if (data.sub_inputs) {
+        data.sub_inputs.forEach(val => addModalSubInput(row.querySelector('.sub-inputs-container').id, val));
+    }
+}
+
+function addModalSubInput(containerId, value = '') {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'sub-input-row';
+    div.innerHTML = `
+        <input type="text" class="admin-form-control m-sub-label" value="${value}" placeholder="Sub-label (e.g. Front)" oninput="syncModalJSON()" style="flex: 1;">
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width: 25px; height: 25px; font-size: 0.7rem;">
             <i class="fas fa-times"></i>
         </div>
     `;
-    container.appendChild(row);
+    container.appendChild(div);
+    syncModalJSON();
 }
 
 function syncModalJSON() {
@@ -188,14 +215,19 @@ function syncModalJSON() {
     document.getElementById('modal_form_json').value = JSON.stringify(fSchema);
 
     // Sync Docs
-    const dRows = document.querySelectorAll('#modal-doc-fields .builder-row');
+    const dContainers = document.querySelectorAll('#modal-doc-fields .m-builder-row-container');
     const dSchema = [];
-    dRows.forEach(row => {
-        const label = row.querySelector('.m-doc-label').value.trim();
+    dContainers.forEach(cont => {
+        const label = cont.querySelector('.m-doc-label').value.trim();
         if (label) {
+            const subs = [];
+            cont.querySelectorAll('.m-sub-label').forEach(s => {
+                if (s.value.trim()) subs.push(s.value.trim());
+            });
             dSchema.push({
                 label: label,
-                required: row.querySelector('.m-doc-req').checked
+                required: cont.querySelector('.m-doc-req').checked,
+                sub_inputs: subs
             });
         }
     });
@@ -204,6 +236,6 @@ function syncModalJSON() {
 
 // Initial rows
 addModalFieldRow({label: 'Full Name', type: 'text', required: true});
-addModalDocRow({label: 'ID Proof', required: true});
+addModalDocRow({label: 'ID Proof', required: true, sub_inputs: ['Front Side', 'Back Side']});
 </script>
 {% endblock %}

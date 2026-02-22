@@ -436,6 +436,10 @@ select.admin-form-control {
     background-size: 16px;
 }
 
+select.admin-form-control option {
+    background-color: var(--admin-bg);
+}
+
 .status-select {
     padding: 8px 12px;
     border-radius: 8px;
@@ -781,4 +785,46 @@ select.admin-form-control {
     .builder-header, .builder-row { grid-template-columns: 1fr; gap: 8px; }
     .builder-header { display: none; }
     .builder-check { justify-content: flex-start; }
+}
+
+/* ============ SUB-INPUT BUILDER ============ */
+.sub-inputs-container {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px dashed rgba(139, 92, 246, 0.2);
+    margin-bottom: 5px;
+}
+
+.sub-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.sub-input-row input {
+    background: rgba(139, 92, 246, 0.03) !important;
+    border-color: rgba(139, 92, 246, 0.1) !important;
+    font-size: 0.8rem !important;
+    padding: 8px 12px !important;
+}
+
+.btn-add-sub {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: var(--admin-accent);
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-add-sub:hover {
+    background: var(--admin-accent);
+    color: white;
 }

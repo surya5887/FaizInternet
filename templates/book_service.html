@@ -141,31 +141,109 @@
                     {% endif %}
                 </div>
 
-                <!-- Dynamic Document Upload Fields -->
+                <!-- Premium Stylish Document Upload Section -->
                 {% if doc_fields %}
                 <div class="doc-upload-section">
-                    <h3 style="color: var(--white); font-size: 1.3rem; margin-bottom: 20px;">
-                        <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent-purple); margin-right: 10px;"></i> Upload Required Documents
+                    <h3 style="color: var(--white); font-size: 1.4rem; margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent-purple); filter: drop-shadow(0 0 8px rgba(155, 93, 229, 0.4));"></i> 
+                        Required Documents
                     </h3>
+                    
                     {% for doc_field in doc_fields %}
-                    <div class="doc-upload-field">
-                        <label>
-                            <i class="fa-solid fa-file-arrow-up"></i>
-                            {{ doc_field.label }} {% if doc_field.required %}<span style="color: var(--accent-orange); font-size: 0.85rem;">*Required</span>{% else %}<span style="color: var(--text-light); font-size: 0.8rem;">(Optional)</span>{% endif %}
+                    <div class="doc-upload-field premium-card" style="padding: 25px; background: rgba(155, 93, 229, 0.03);">
+                        <label style="font-size: 1.1rem; margin-bottom: 15px;">
+                            <i class="fa-solid fa-file-shield" style="color: var(--accent-purple);"></i>
+                            {{ doc_field.label }} 
+                            {% if doc_field.required %}
+                                <span class="badge" style="background: rgba(255, 107, 53, 0.15); color: var(--accent-orange); font-size: 0.7rem; margin-left: 8px;">REQUIRED</span>
+                            {% endif %}
                         </label>
-                        <input type="file" name="doc_field_{{ loop.index0 }}" class="form-control" accept=".pdf,.jpg,.jpeg,.png" {% if doc_field.required %}required{% endif %}>
-                        <p style="font-size: 0.78rem; color: var(--text-light); margin: 8px 0 0 0;">Accepted: PDF, JPG, PNG (Max 16MB)</p>
+
+                        {% if doc_field.sub_inputs and doc_field.sub_inputs|length > 0 %}
+                            <!-- Multi-part Upload (e.g. Front & Back) -->
+                            <div class="multi-upload-grid">
+                                {% for sub_label in doc_field.sub_inputs %}
+                                <div class="sub-input-group">
+                                    <span class="sub-input-label">{{ sub_label }}</span>
+                                    <div class="stylish-upload-container" onclick="this.querySelector('input').click()">
+                                        <div class="upload-icon-box">
+                                            <i class="fa-solid fa-camera"></i>
+                                        </div>
+                                        <span class="upload-text-main">Choose File</span>
+                                        <span class="upload-text-sub">or drag & drop</span>
+                                        <input type="file" name="doc_{{ loop.parent.index0 }}_{{ loop.index0 }}" 
+                                               class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
+                                               {% if doc_field.required %}required{% endif %}
+                                               onchange="handlePreview(this)">
+                                        <div class="file-preview-area">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            <span class="file-name-text">No file selected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <!-- Single Stylish Upload -->
+                            <div class="stylish-upload-container" onclick="this.querySelector('input').click()">
+                                <div class="upload-icon-box">
+                                    <i class="fa-solid fa-upload"></i>
+                                </div>
+                                <span class="upload-text-main">Click to Upload Document</span>
+                                <span class="upload-text-sub">PDF, JPG, or PNG (Max 16MB)</span>
+                                <input type="file" name="doc_field_{{ loop.index0 }}" 
+                                       class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
+                                       {% if doc_field.required %}required{% endif %}
+                                       onchange="handlePreview(this)">
+                                <div class="file-preview-area">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span class="file-name-text">No file selected</span>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
-                {% else %}
-                <!-- Fallback single document upload -->
-                <div class="form-group full-width" style="margin-top: 10px; border-top: 1px solid rgba(155, 93, 229, 0.15); padding-top: 30px;">
-                    <label>Upload Supporting Documents (Optional)</label>
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Please upload a clear PDF, JPG, or PNG containing any existing documents or proofs (Max 16MB).</p>
-                    <input type="file" name="document" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                </div>
                 {% endif %}
+
+                <script>
+                function handlePreview(input) {
+                    const container = input.closest('.stylish-upload-container');
+                    const previewArea = container.querySelector('.file-preview-area');
+                    const fileNameText = container.querySelector('.file-name-text');
+                    
+                    if (input.files && input.files[0]) {
+                        previewArea.classList.add('active');
+                        fileNameText.textContent = input.files[0].name;
+                        container.style.borderColor = 'var(--accent-blue)';
+                        container.style.background = 'rgba(0, 245, 212, 0.05)';
+                    } else {
+                        previewArea.classList.remove('active');
+                        container.style.borderColor = '';
+                        container.style.background = '';
+                    }
+                }
+
+                // Add drag & drop support
+                document.querySelectorAll('.stylish-upload-container').forEach(container => {
+                    container.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        container.classList.add('drag-over');
+                    });
+                    container.addEventListener('dragleave', () => {
+                        container.classList.remove('drag-over');
+                    });
+                    container.addEventListener('drop', e => {
+                        e.preventDefault();
+                        container.classList.remove('drag-over');
+                        const input = container.querySelector('input');
+                        if (e.dataTransfer.files.length) {
+                            input.files = e.dataTransfer.files;
+                            handlePreview(input);
+                        }
+                    });
+                });
+                </script>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px; font-size: 1.1rem; padding: 18px;">
                     <i class="fa-solid fa-paper-plane" style="margin-right: 10px;"></i> Submit Secure Application

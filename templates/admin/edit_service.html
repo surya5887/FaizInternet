@@ -142,31 +142,66 @@ function syncFormJSON() {
 }
 
 // --- DOCUMENT BUILDER ---
-function addDocFieldRow(data = {label: '', required: true}) {
+function addDocFieldRow(data = {label: '', required: true, sub_inputs: []}) {
     const container = document.getElementById('doc-fields-builder');
     const row = document.createElement('div');
-    row.className = 'builder-row doc-builder-row';
+    row.className = 'builder-row-container'; // Wrapper for row + sub-inputs
+    row.style.marginBottom = '20px';
+    
     row.innerHTML = `
-        <input type="text" class="admin-form-control doc-label" value="${data.label}" placeholder="e.g. Aadhaar Card Front" oninput="syncDocJSON()">
-        <label class="builder-check">
-            <input type="checkbox" class="doc-req" ${data.required?'checked':''} onchange="syncDocJSON()">
-        </label>
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncDocJSON();">
+        <div class="builder-row doc-builder-row">
+            <input type="text" class="admin-form-control doc-label" value="${data.label}" placeholder="e.g. Aadhaar Card" oninput="syncDocJSON()">
+            <label class="builder-check">
+                <input type="checkbox" class="doc-req" ${data.required?'checked':''} onchange="syncDocJSON()">
+            </label>
+            <div class="builder-remove" onclick="this.parentElement.parentElement.remove(); syncDocJSON();">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="sub-inputs-container" id="subs-${Date.now()}">
+            <!-- Sub-inputs will go here -->
+        </div>
+        <button type="button" class="btn-add-sub" onclick="addSubInput('${row.querySelector('.sub-inputs-container').id}')">
+            <i class="fas fa-plus"></i> Add Sub-Input (e.g. Front Side)
+        </button>
+    `;
+    container.appendChild(row);
+    
+    // Load existing sub-inputs if any
+    if (data.sub_inputs && data.sub_inputs.length > 0) {
+        data.sub_inputs.forEach(subLabel => addSubInput(row.querySelector('.sub-inputs-container').id, subLabel));
+    }
+}
+
+function addSubInput(containerId, value = '') {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'sub-input-row';
+    div.innerHTML = `
+        <input type="text" class="admin-form-control sub-input-label" value="${value}" placeholder="Input Label (e.g. Back Side)" oninput="syncDocJSON()" style="flex: 1;">
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncDocJSON();" style="width: 25px; height: 25px; font-size: 0.7rem;">
             <i class="fas fa-times"></i>
         </div>
     `;
-    container.appendChild(row);
+    container.appendChild(div);
+    syncDocJSON();
 }
 
 function syncDocJSON() {
-    const rows = document.querySelectorAll('#doc-fields-builder .builder-row');
+    const containers = document.querySelectorAll('#doc-fields-builder .builder-row-container');
     const docs = [];
-    rows.forEach(row => {
-        const label = row.querySelector('.doc-label').value.trim();
+    containers.forEach(container => {
+        const label = container.querySelector('.doc-label').value.trim();
         if (label) {
+            const subInputs = [];
+            container.querySelectorAll('.sub-input-label').forEach(sub => {
+                if (sub.value.trim()) subInputs.push(sub.value.trim());
+            });
+            
             docs.push({
                 label: label,
-                required: row.querySelector('.doc-req').checked
+                required: container.querySelector('.doc-req').checked,
+                sub_inputs: subInputs
             });
         }
     });
