@@ -191,7 +191,7 @@
                                     <i class="fa-solid fa-upload"></i>
                                 </div>
                                 <span class="upload-text-main">Click to Upload Document</span>
-                                <span class="upload-text-sub">PDF, JPG, or PNG (Max 16MB)</span>
+                                <span class="upload-text-sub">PDF, JPG, or PNG (Max 2MB per file advised)</span>
                                 <input type="file" name="doc_field_{{ loop.index0 }}" 
                                        class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
                                        {% if doc_field.get('required') %}data-required="true"{% endif %}
@@ -249,9 +249,41 @@
                     });
                 });
 
-                // Custom validation to highlight empty required file inputs visibly
+                // Custom validation to highlight empty required file inputs visibly and check total payload size
                 document.querySelector('form').addEventListener('submit', function(e) {
                     let isValid = true;
+                    
+                    let totalSize = 0;
+                    const allFiles = this.querySelectorAll('input[type="file"]');
+                    allFiles.forEach(input => {
+                        if (input.files.length > 0) {
+                            totalSize += input.files[0].size;
+                        }
+                    });
+
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const existingSizeError = document.getElementById('size-error-msg');
+                    if (existingSizeError) existingSizeError.remove();
+
+                    if (totalSize > 4 * 1024 * 1024) { // 4MB Limit for Vercel Hobby
+                        isValid = false;
+                        
+                        const sizeError = document.createElement('div');
+                        sizeError.id = 'size-error-msg';
+                        sizeError.style.color = 'var(--accent-orange)';
+                        sizeError.style.background = 'rgba(255, 107, 53, 0.1)';
+                        sizeError.style.border = '1px dashed var(--accent-orange)';
+                        sizeError.style.padding = '15px';
+                        sizeError.style.borderRadius = '10px';
+                        sizeError.style.marginBottom = '20px';
+                        sizeError.style.textAlign = 'center';
+                        sizeError.style.fontWeight = '600';
+                        sizeError.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <strong>Upload Limit Exceeded:</strong> Total file size is ' + (totalSize / (1024 * 1024)).toFixed(2) + 'MB. Vercel limits submissions to 4.0MB. Please compress your files and try again.';
+                        
+                        submitBtn.parentNode.insertBefore(sizeError, submitBtn);
+                        sizeError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+
                     const requiredFiles = this.querySelectorAll('input.file-input-hidden[data-required="true"]');
                     
                     requiredFiles.forEach(input => {
