@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Faiz Internet - Common Service Centre{% endblock %}</title>
+    <title>{% block title %}Faiz Internet - Common Service Center{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
                 <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Faiz Internet Logo" style="height: 55px; width: auto;">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: 1px;">FAIZ <span style="color: var(--accent-blue);">INTERNET</span></h1>
-                    <p style="margin: 0; font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 3px;">Common Service Centre</p>
+                    <p style="margin: 0; font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 3px;">Common Service Center</p>
                 </div>
             </a>
             
@@ -39,7 +39,7 @@
             </nav>
             <div class="header-right">
                 <div class="contact-number">
-                    <i class="fa-solid fa-headset"></i> +91 98765 43210
+                    <i class="fa-solid fa-headset"></i> +91 9756520529
                 </div>
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('dashboard') }}" class="btn-login"><i class="fa-solid fa-user-shield"></i> Dashboard</a>
