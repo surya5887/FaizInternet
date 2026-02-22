@@ -4,43 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faiz Internet | Premium Admin</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Admin CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
 
     <!-- Sidebar -->
     <aside class="admin-sidebar" id="sidebar">
-        <div class="sidebar-header" style="padding: 20px; text-align: center;">
-            <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Logo" style="height: 60px; width: auto; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));">
-            <h2 style="font-size: 1.1rem; color: white;">Usman Ali (Admin)</h2>
+        <div class="sidebar-header" style="padding: 25px 20px; text-align: center;">
+            <img src="{{ url_for('static', filename='img/faiz_logo.png') }}" alt="Logo" style="height: 50px; width: auto; margin-bottom: 10px; filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.4));">
+            <h2 style="font-size: 1rem; color: white; font-weight: 700;">{{ current_user.name }}</h2>
+            <p style="font-size: 0.7rem; color: rgba(139, 92, 246, 0.8); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">Admin Panel</p>
         </div>
         
         <nav class="sidebar-nav">
             <a href="{{ url_for('manage_dashboard') }}" class="nav-item {% if request.endpoint == 'manage_dashboard' %}active{% endif %}">
-                <i class="fas fa-home"></i> Dashboard Overview
+                <i class="fas fa-chart-pie"></i> Dashboard
             </a>
-            <a href="{{ url_for('manage_applications') }}" class="nav-item {% if request.endpoint == 'manage_applications' %}active{% endif %}">
+            <a href="{{ url_for('manage_applications') }}" class="nav-item {% if request.endpoint in ['manage_applications', 'application_detail'] %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> Applications
             </a>
-            <a href="{{ url_for('manage_services') }}" class="nav-item {% if request.endpoint == 'manage_services' %}active{% endif %}">
+            <a href="{{ url_for('manage_services') }}" class="nav-item {% if request.endpoint in ['manage_services', 'edit_service'] %}active{% endif %}">
                 <i class="fas fa-cogs"></i> Service Manager
             </a>
             <a href="{{ url_for('admin_settings') }}" class="nav-item {% if request.endpoint == 'admin_settings' %}active{% endif %}">
-                <i class="fas fa-key"></i> Passwords & Settings
+                <i class="fas fa-sliders-h"></i> Settings
             </a>
             {% if current_user.role == 'superuser' %}
-            <a href="{{ url_for('superuser_dashboard') }}" class="nav-item" style="color: #38bdf8;">
+            <a href="{{ url_for('superuser_dashboard') }}" class="nav-item" style="color: #f59e0b; margin-top: 10px;">
                 <i class="fas fa-crown"></i> Master Portal
             </a>
             {% endif %}
         </nav>
         
         <div class="sidebar-footer">
+            <a href="{{ url_for('index') }}" class="nav-item" style="margin: 0 0 8px 0; padding: 10px 15px; color: var(--admin-accent2);">
+                <i class="fas fa-globe"></i> View Website
+            </a>
             <a href="{{ url_for('admin_logout') }}" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Secure Logout
             </a>
@@ -58,7 +59,6 @@
         </header>
         
         <div class="content-area">
-            <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <div class="admin-flash-messages">

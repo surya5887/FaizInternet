@@ -16,17 +16,22 @@
         gap: 25px;
         margin-bottom: 40px;
         padding-bottom: 30px;
-        border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        border-bottom: 1px solid rgba(155, 93, 229, 0.15);
     }
-    .service-header img {
+    .service-header .service-icon-box {
         width: 100px;
         height: 100px;
-        object-fit: contain;
-        background: rgba(10, 25, 47, 0.5);
-        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(155, 93, 229, 0.08);
         border-radius: 20px;
-        border: 1px solid rgba(100, 255, 218, 0.2);
-        filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(180deg);
+        border: 1px solid rgba(155, 93, 229, 0.2);
+        flex-shrink: 0;
+    }
+    .service-header .service-icon-box i {
+        font-size: 2.5rem;
+        color: var(--accent-purple);
     }
     .service-title {
         font-size: 2.2rem;
@@ -42,16 +47,40 @@
         grid-column: 1 / -1;
     }
     .info-box {
-        background: rgba(100, 255, 218, 0.05);
-        border-left: 4px solid var(--accent-blue);
+        background: rgba(155, 93, 229, 0.05);
+        border-left: 4px solid var(--accent-purple);
         padding: 20px;
         border-radius: var(--border-radius-sm);
         margin-bottom: 30px;
         font-size: 0.95rem;
         color: var(--white);
     }
+    .doc-upload-section {
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(155, 93, 229, 0.15);
+    }
+    .doc-upload-field {
+        background: rgba(155, 93, 229, 0.04);
+        padding: 20px;
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(155, 93, 229, 0.1);
+        margin-bottom: 15px;
+    }
+    .doc-upload-field label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--white);
+    }
+    .doc-upload-field label i {
+        color: var(--accent-purple);
+    }
     @media (max-width: 768px) {
         .grid-form { grid-template-columns: 1fr; }
+        .service-header { flex-direction: column; text-align: center; }
     }
 </style>
 {% endblock %}
@@ -62,7 +91,9 @@
         <div class="premium-card premium-form">
             
             <div class="service-header">
-                <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}">
+                <div class="service-icon-box">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
                 <div>
                     <h2 class="service-title">Apply for {{ service.title }}</h2>
                     <p style="color: var(--text-light); font-size: 1.1rem; margin: 0;">{{ service.description }}</p>
@@ -70,7 +101,7 @@
             </div>
 
             <div class="info-box">
-                <i class="fa-solid fa-circle-user" style="margin-right: 10px; font-size: 1.2rem; color: var(--accent-blue);"></i>
+                <i class="fa-solid fa-circle-user" style="margin-right: 10px; font-size: 1.2rem; color: var(--accent-purple);"></i>
                 Applying as <strong style="color: var(--accent-gold);">{{ current_user.name }}</strong> ({{ current_user.phone }}). We will contact you at <strong style="color: var(--accent-gold);">{{ current_user.email }}</strong> regarding this application.
             </div>
 
@@ -78,15 +109,14 @@
                 
                 <div class="form-group full-width">
                     <label>Application Type</label>
-                    <select name="application_type" class="form-control" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364FFDA%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;">
-                        <option value="New Application" style="color: #1e293b;">New Application</option>
-                        <option value="Correction / Update" style="color: #1e293b;">Correction / Update</option>
-                        <option value="Replacement / Reprint" style="color: #1e293b;">Replacement / Reprint</option>
+                    <select name="application_type" class="form-control">
+                        <option value="New Application">New Application</option>
+                        <option value="Correction / Update">Correction / Update</option>
+                        <option value="Replacement / Reprint">Replacement / Reprint</option>
                     </select>
                 </div>
 
                 <div class="grid-form">
-                    <!-- Dynamically generate fields based on database schema -->
                     {% if schema %}
                         {% for field in schema %}
                             <div class="form-group {% if field.type == 'textarea' %}full-width{% endif %}">
@@ -95,8 +125,14 @@
                                 {% if field.type == 'textarea' %}
                                     <textarea id="{{ field.name }}" name="{{ field.name }}" class="form-control" rows="3" {% if field.required %}required{% endif %}></textarea>
                                 {% elif field.type == 'date' %}
-                                    <!-- Use standard input text type for date with placeholder, modern UI logic to handle calendar optional -->
                                     <input type="date" id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
+                                {% elif field.type == 'select' %}
+                                    <select id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
+                                        <option value="">-- Select --</option>
+                                        {% for opt in field.get('options', []) %}
+                                        <option value="{{ opt }}">{{ opt }}</option>
+                                        {% endfor %}
+                                    </select>
                                 {% else %}
                                     <input type="{{ field.type }}" id="{{ field.name }}" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
                                 {% endif %}
@@ -105,11 +141,31 @@
                     {% endif %}
                 </div>
 
-                <div class="form-group full-width" style="margin-top: 10px; border-top: 1px solid rgba(100, 255, 218, 0.1); padding-top: 30px;">
+                <!-- Dynamic Document Upload Fields -->
+                {% if doc_fields %}
+                <div class="doc-upload-section">
+                    <h3 style="color: var(--white); font-size: 1.3rem; margin-bottom: 20px;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent-purple); margin-right: 10px;"></i> Upload Required Documents
+                    </h3>
+                    {% for doc_field in doc_fields %}
+                    <div class="doc-upload-field">
+                        <label>
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                            {{ doc_field.label }} {% if doc_field.required %}<span style="color: var(--accent-orange); font-size: 0.85rem;">*Required</span>{% else %}<span style="color: var(--text-light); font-size: 0.8rem;">(Optional)</span>{% endif %}
+                        </label>
+                        <input type="file" name="doc_field_{{ loop.index0 }}" class="form-control" accept=".pdf,.jpg,.jpeg,.png" {% if doc_field.required %}required{% endif %}>
+                        <p style="font-size: 0.78rem; color: var(--text-light); margin: 8px 0 0 0;">Accepted: PDF, JPG, PNG (Max 16MB)</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Fallback single document upload -->
+                <div class="form-group full-width" style="margin-top: 10px; border-top: 1px solid rgba(155, 93, 229, 0.15); padding-top: 30px;">
                     <label>Upload Supporting Documents (Optional)</label>
                     <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Please upload a clear PDF, JPG, or PNG containing any existing documents or proofs (Max 16MB).</p>
                     <input type="file" name="document" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                 </div>
+                {% endif %}
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px; font-size: 1.1rem; padding: 18px;">
                     <i class="fa-solid fa-paper-plane" style="margin-right: 10px;"></i> Submit Secure Application

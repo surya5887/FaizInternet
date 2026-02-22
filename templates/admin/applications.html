@@ -7,7 +7,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Client Applications</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Process user requests, update statuses, and download attached documents.</p>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin: 4px 0 0 0;">Click "View" to see full details, uploaded documents, and upload response files.</p>
         </div>
     </div>
     
@@ -16,10 +16,11 @@
             <thead>
                 <tr>
                     <th>Ticket</th>
-                    <th>Client Details</th>
-                    <th>Service Requested</th>
-                    <th>Submitted Data</th>
-                    <th>Support Status</th>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Quick Update</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,58 +29,41 @@
                 {% set data = app_obj.data %}
                 <tr>
                     <td>
-                        <strong>#{{ app.id }}</strong><br>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">{{ app.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <strong style="color: var(--admin-accent);">#{{ app.id }}</strong><br>
+                        <span style="font-size: 0.75rem; color: var(--admin-text-dim);">{{ app.created_at.strftime('%d %b %Y') }}</span>
                     </td>
                     <td>
-                        <div style="font-weight: 500; color: var(--text-main);">{{ app.applicant.name }}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">{{ app.applicant.phone }}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">{{ app.applicant.email }}</div>
+                        <div style="font-weight: 600; color: var(--admin-white);">{{ app.applicant.name }}</div>
+                        <div style="font-size: 0.82rem; color: var(--admin-text-muted);">{{ app.applicant.phone }}</div>
                     </td>
                     <td>
                         <strong>{{ app.service.title }}</strong>
-                        <div style="margin-top: 5px;">
-                            {% if app.document_path and supabase %}
-                                {% set url = supabase.storage.from_('documents').create_signed_url(app.document_path, 60 * 60) %}
-                                {% if url and url.signedURL %}
-                                <a href="{{ url.signedURL }}" target="_blank" class="btn btn-sm btn-outline">
-                                    <i class="fas fa-file-download"></i> View Doc
-                                </a>
-                                {% endif %}
-                            {% else %}
-                                <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fas fa-minus"></i> No Document</span>
-                            {% endif %}
-                        </div>
+                        <div style="font-size: 0.78rem; color: var(--admin-text-dim); margin-top: 3px;">{{ app.application_type }}</div>
                     </td>
                     <td>
-                        {% if data %}
-                            <div style="background: #f8fafc; padding: 10px; border-radius: 6px; font-size: 0.8rem; max-height: 120px; overflow-y: auto; border: 1px solid var(--border);">
-                            {% for key, val in data.items() %}
-                                <strong>{{ key.replace('_', ' ').title() }}:</strong> {{ val }}<br>
-                            {% endfor %}
-                            </div>
-                        {% else %}
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">Standard Application</span>
-                        {% endif %}
+                        <span class="badge {{ app.status | lower }}">{{ app.status }}</span>
                     </td>
-                    <td style="min-width: 250px;">
-                        <form method="POST" action="{{ url_for('admin_update_status', app_id=app.id) }}">
-                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                <select name="status" class="status-select" style="flex: 1;">
-                                    <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
-                                    <option value="Processing" {% if app.status == 'Processing' %}selected{% endif %}>Processing</option>
-                                    <option value="Completed" {% if app.status == 'Completed' %}selected{% endif %}>Completed</option>
-                                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                            </div>
-                            <input type="text" name="admin_notes" class="admin-form-control" style="font-size: 0.8rem; padding: 6px 10px;" placeholder="Internal notes/remarks..." value="{{ app.admin_notes or '' }}">
+                    <td style="min-width: 220px;">
+                        <form method="POST" action="{{ url_for('admin_update_status', app_id=app.id) }}" style="display: flex; gap: 6px;">
+                            <select name="status" class="status-select" style="flex: 1;">
+                                <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="Processing" {% if app.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                <option value="Completed" {% if app.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                            <input type="hidden" name="admin_notes" value="{{ app.admin_notes or '' }}">
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </form>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('application_detail', app_id=app.id) }}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i> View
+                        </a>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
                         No applications to process.
                     </td>
                 </tr>

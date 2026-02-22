@@ -7,7 +7,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Active Services</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Manage services visible on the public frontend.</p>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin: 4px 0 0 0;">Manage services, form fields, and document requirements.</p>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('active')">
             <i class="fas fa-plus"></i> Add Service
@@ -19,37 +19,50 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Title & Description</th>
-                    <th>Form Schema Logic</th>
+                    <th>Service Info</th>
+                    <th>Form Fields</th>
+                    <th>Doc Fields</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for svc in services %}
                 <tr>
-                    <td>#{{ svc.id }}</td>
+                    <td><strong style="color: var(--admin-accent);">#{{ svc.id }}</strong></td>
                     <td>
-                        <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">{{ svc.title }}</strong>
-                        <span style="color: var(--text-muted); font-size: 0.85rem;">{{ svc.description }}</span>
+                        <strong style="color: var(--admin-white); display: block; margin-bottom: 4px;">{{ svc.title }}</strong>
+                        <span style="color: var(--admin-text-muted); font-size: 0.82rem;">{{ svc.description[:80] }}{% if svc.description|length > 80 %}...{% endif %}</span>
                     </td>
                     <td>
                         {% if svc.form_schema %}
-                            <span class="badge success"><i class="fas fa-code"></i> Dynamic Form Attached</span>
+                            <span class="badge success"><i class="fas fa-code"></i> Active</span>
                         {% else %}
-                            <span class="badge user">No Custom Form</span>
+                            <span class="badge user">None</span>
                         {% endif %}
                     </td>
                     <td>
-                        <form method="POST" action="{{ url_for('delete_service', service_id=svc.id) }}" onsubmit="return confirm('Are you sure you want to delete this service? All associated applications will also be deleted.');">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash-alt"></i> Remove
-                            </button>
-                        </form>
+                        {% if svc.required_documents %}
+                            <span class="badge admin"><i class="fas fa-file-upload"></i> Configured</span>
+                        {% else %}
+                            <span class="badge user">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('edit_service', service_id=svc.id) }}" class="btn btn-sm btn-outline">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_service', service_id=svc.id) }}" onsubmit="return confirm('Delete this service? All associated applications will also be deleted.');">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
                         No services found. Add one to get started.
                     </td>
                 </tr>
@@ -63,7 +76,7 @@
 <div class="modal" id="addServiceModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Deploy New Service</h3>
+            <h3><i class="fas fa-plus-circle" style="color: var(--admin-accent); margin-right: 8px;"></i> Deploy New Service</h3>
             <i class="fas fa-times close-btn" onclick="document.getElementById('addServiceModal').classList.remove('active')"></i>
         </div>
         <form method="POST" action="{{ url_for('add_service') }}">
@@ -76,15 +89,18 @@
                     <label>Short Description</label>
                     <textarea name="description" class="admin-form-control" rows="2" required placeholder="Brief detail about the service..."></textarea>
                 </div>
-                <div class="admin-form-group" style="margin-bottom: 0;">
+                <div class="admin-form-group">
                     <label>Form Schema (JSON Array)</label>
-                    <textarea name="form_schema" class="admin-form-control" rows="5" placeholder="e.g. [{'name': 'id', ...}]"></textarea>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Leave blank for default file.</p>
+                    <textarea name="form_schema" class="admin-form-control" rows="4" placeholder='[{"name": "applicant_name", "label": "Full Name", "type": "text", "required": true}]' style="font-family: monospace; font-size: 0.85rem;"></textarea>
+                </div>
+                <div class="admin-form-group" style="margin-bottom: 0;">
+                    <label>Required Documents (JSON Array)</label>
+                    <textarea name="required_documents" class="admin-form-control" rows="3" placeholder='[{"label": "ID Proof", "required": true}]' style="font-family: monospace; font-size: 0.85rem;"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('addServiceModal').classList.remove('active')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Deploy Service</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-rocket"></i> Deploy</button>
             </div>
         </form>
     </div>

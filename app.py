@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Database Configuration (Use Supabase URL if available, else fallback to local SQLite)
 database_url = os.getenv("DATABASE_URL")
 if database_url:
-    # SQLAlchemy requires 'postgresql://' instead of 'postgres://' if that's how it's provided
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
@@ -42,58 +41,95 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- Models ---
+# ===================== MODELS =====================
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    plain_password = db.Column(db.String(200), nullable=True) # To allow Superuser visibility
-    role = db.Column(db.String(20), default='user') # 'user', 'admin', or 'superuser'
+    plain_password = db.Column(db.String(200), nullable=True)
+    role = db.Column(db.String(20), default='user')
     applications = db.relationship('Application', backref='applicant', lazy=True)
 
 class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
     icon_path = db.Column(db.String(100), default='img/service-icon.png')
-    
-    # Stores JSON string of required fields to dynamically render the form
-    # e.g., '[{"name": "aadhar_no", "label": "Aadhaar Card Number", "type": "text"}]'
-    form_schema = db.Column(db.Text, nullable=True) 
+    form_schema = db.Column(db.Text, nullable=True)       # JSON: form fields config
+    required_documents = db.Column(db.Text, nullable=True) # JSON: list of doc upload field configs
     applications = db.relationship('Application', backref='service', lazy=True)
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
-    
-    application_type = db.Column(db.String(50), nullable=False) # e.g. "New Application", "Correction", "Update"
-    
-    # Store dynamic submitted data as JSON
+    application_type = db.Column(db.String(50), nullable=False)
     submitted_data = db.Column(db.Text, nullable=True)
-    
-    document_path = db.Column(db.String(255), nullable=True) # Path to uploaded file
-    
-    status = db.Column(db.String(50), default='Pending') # Pending, Processing, Completed, Rejected
+    document_path = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(50), default='Pending')
     admin_notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    documents = db.relationship('ApplicationDocument', backref='application', lazy=True, cascade='all, delete-orphan')
+
+class ApplicationDocument(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('application.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)        # Storage filename
+    original_name = db.Column(db.String(255), nullable=False)   # User-visible name
+    doc_label = db.Column(db.String(200), nullable=True)        # e.g. "Aadhaar Copy"
+    uploaded_by = db.Column(db.String(20), default='user')      # 'user' or 'admin'
+    doc_type = db.Column(db.String(20), default='request')      # 'request' (user->admin) or 'response' (admin->user)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class SiteSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=True)
+
+# ===================== HELPERS =====================
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- Context Processors ---
+def get_setting(key, default=''):
+    """Get a site setting value by key."""
+    try:
+        s = SiteSetting.query.filter_by(key=key).first()
+        return s.value if s else default
+    except:
+        return default
+
+def set_setting(key, value):
+    """Set or update a site setting."""
+    s = SiteSetting.query.filter_by(key=key).first()
+    if s:
+        s.value = value
+    else:
+        db.session.add(SiteSetting(key=key, value=value))
+
+# Context processor — inject settings + services into all templates
 @app.context_processor
-def inject_services():
+def inject_globals():
     try:
         services = Service.query.all()
     except:
         services = []
-    return dict(all_services=services)
+    
+    # Build settings dict
+    site = {}
+    try:
+        for s in SiteSetting.query.all():
+            site[s.key] = s.value
+    except:
+        pass
+    
+    return dict(all_services=services, site=site)
 
-# --- Routes ---
+# ===================== PUBLIC ROUTES =====================
 
 @app.route('/')
 def index():
@@ -117,7 +153,7 @@ def pricing():
 def contact():
     return render_template('contact.html')
 
-# --- Authentication Routes ---
+# ===================== AUTH ROUTES =====================
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -162,7 +198,6 @@ def login():
             return redirect(url_for('login'))
             
         login_user(user)
-        
         return redirect(url_for('dashboard'))
         
     return render_template('login.html')
@@ -173,35 +208,72 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-# --- User Actions ---
+# ===================== USER DASHBOARD =====================
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     applications = Application.query.filter_by(user_id=current_user.id).order_by(Application.created_at.desc()).all()
     
-    # Parse JSON data before sending to template
     parsed_apps = []
-    for app in applications:
+    for app_item in applications:
         data = None
-        if app.submitted_data:
+        if app_item.submitted_data:
             try:
-                data = json.loads(app.submitted_data)
+                data = json.loads(app_item.submitted_data)
             except:
                 pass
-        parsed_apps.append({'model': app, 'data': data})
+        # Get response documents (admin-uploaded)
+        response_docs = ApplicationDocument.query.filter_by(
+            application_id=app_item.id, doc_type='response'
+        ).all()
+        parsed_apps.append({'model': app_item, 'data': data, 'response_docs': response_docs})
         
     return render_template('dashboard.html', applications=parsed_apps)
+
+@app.route('/download/<int:doc_id>')
+@login_required
+def download_document(doc_id):
+    """Generate a signed URL for downloading a document."""
+    doc = ApplicationDocument.query.get_or_404(doc_id)
+    app_item = Application.query.get_or_404(doc.application_id)
+    
+    # Security: only the application owner or admin can download
+    if app_item.user_id != current_user.id and current_user.role not in ['admin', 'superuser']:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    if supabase:
+        try:
+            url = supabase.storage.from_('documents').create_signed_url(doc.filename, 60 * 60)
+            if url and url.get('signedURL'):
+                return redirect(url['signedURL'])
+        except:
+            pass
+    
+    flash('Unable to generate download link.', 'danger')
+    return redirect(url_for('dashboard'))
+
+# ===================== BOOKING (USER) =====================
 
 @app.route('/book/<int:service_id>', methods=['GET', 'POST'])
 @login_required
 def book_service(service_id):
     service = Service.query.get_or_404(service_id)
     
-    # Parse the required fields schema for this service
     schema = []
     if service.form_schema:
-        schema = json.loads(service.form_schema)
+        try:
+            schema = json.loads(service.form_schema)
+        except:
+            pass
+    
+    doc_fields = []
+    if service.required_documents:
+        try:
+            doc_fields = json.loads(service.required_documents)
+        except:
+            pass
     
     if request.method == 'POST':
         app_type = request.form.get('application_type', 'New Application')
@@ -210,20 +282,18 @@ def book_service(service_id):
         form_data = {}
         for field in schema:
             form_data[field['name']] = request.form.get(field['name'])
-            
-        # Handle File Upload to Supabase Storage
+        
+        # Handle legacy single file upload
         doc_filename = None
         if 'document' in request.files:
             file = request.files['document']
             if file and file.filename != '':
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                 filename = secure_filename(f"{current_user.id}_{timestamp}_{file.filename}")
-                
-                # Upload to Supabase Storage 'documents' bucket
                 if supabase:
                     try:
                         file_bytes = file.read()
-                        res = supabase.storage.from_('documents').upload(
+                        supabase.storage.from_('documents').upload(
                             path=filename,
                             file=file_bytes,
                             file_options={"content-type": file.content_type}
@@ -231,8 +301,6 @@ def book_service(service_id):
                         doc_filename = filename
                     except Exception as e:
                         flash(f'Error uploading document: {str(e)}', 'danger')
-                else:
-                    flash('Storage is not configured.', 'danger')
 
         new_app = Application(
             user_id=current_user.id,
@@ -244,18 +312,48 @@ def book_service(service_id):
         db.session.add(new_app)
         db.session.commit()
         
+        # Handle multiple document uploads
+        for i, doc_field in enumerate(doc_fields):
+            field_name = f"doc_field_{i}"
+            if field_name in request.files:
+                file = request.files[field_name]
+                if file and file.filename != '':
+                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                    fname = secure_filename(f"{current_user.id}_{new_app.id}_{timestamp}_{file.filename}")
+                    if supabase:
+                        try:
+                            file_bytes = file.read()
+                            supabase.storage.from_('documents').upload(
+                                path=fname,
+                                file=file_bytes,
+                                file_options={"content-type": file.content_type}
+                            )
+                            new_doc = ApplicationDocument(
+                                application_id=new_app.id,
+                                filename=fname,
+                                original_name=file.filename,
+                                doc_label=doc_field.get('label', f'Document {i+1}'),
+                                uploaded_by='user',
+                                doc_type='request'
+                            )
+                            db.session.add(new_doc)
+                        except Exception as e:
+                            flash(f'Error uploading {doc_field.get("label", "document")}: {str(e)}', 'danger')
+        
+        db.session.commit()
         flash(f'Your application for {service.title} has been submitted successfully!', 'success')
         return redirect(url_for('dashboard'))
         
-    return render_template('book_service.html', service=service, schema=schema)
+    return render_template('book_service.html', service=service, schema=schema, doc_fields=doc_fields)
 
-# --- Admin & Superuser Decorators ---
+# ===================== ADMIN DECORATORS =====================
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role not in ['admin', 'superuser']:
-            flash('Unauthorized access. Admin privileges required.', 'danger')
-            return redirect(url_for('login'))
+            flash('Admin access required.', 'danger')
+            return redirect(url_for('admin_login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -263,16 +361,16 @@ def superuser_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != 'superuser':
-            flash('Unauthorized access. Administrator privileges required.', 'danger')
-            return redirect(url_for('login'))
+            flash('Superuser access required.', 'danger')
+            return redirect(url_for('superuser_login'))
         return f(*args, **kwargs)
     return decorated_function
 
-# --- Premium Admin Portal Routes ---
+# ===================== ADMIN AUTH =====================
 
 @app.route('/manage/login', methods=['GET', 'POST'])
 def admin_login():
-    if current_user.is_authenticated and current_user.role == 'admin':
+    if current_user.is_authenticated and current_user.role in ['admin', 'superuser']:
         return redirect(url_for('manage_dashboard'))
         
     if request.method == 'POST':
@@ -282,11 +380,11 @@ def admin_login():
         user = User.query.filter_by(email=email).first()
         
         if not user or not check_password_hash(user.password, password):
-            flash('Invalid admin credentials.', 'danger')
+            flash('Invalid credentials.', 'danger')
             return redirect(url_for('admin_login'))
             
-        if user.role != 'admin':
-            flash('Access denied. You do not have admin permissions.', 'danger')
+        if user.role not in ['admin', 'superuser']:
+            flash('You do not have admin privileges.', 'danger')
             return redirect(url_for('admin_login'))
             
         login_user(user)
@@ -295,10 +393,12 @@ def admin_login():
     return render_template('admin/login.html')
 
 @app.route('/manage/logout')
-@login_required
+@admin_required
 def admin_logout():
     logout_user()
     return redirect(url_for('admin_login'))
+
+# ===================== ADMIN DASHBOARD =====================
 
 @app.route('/manage/dashboard')
 @admin_required
@@ -307,12 +407,130 @@ def manage_dashboard():
     total_services = Service.query.count()
     total_applications = Application.query.count()
     pending_applications = Application.query.filter_by(status='Pending').count()
+    completed_applications = Application.query.filter_by(status='Completed').count()
+    
+    # Recent applications
+    recent_apps = Application.query.order_by(Application.created_at.desc()).limit(5).all()
     
     return render_template('admin/dashboard.html', 
                            total_users=total_users,
                            total_services=total_services,
                            total_applications=total_applications,
-                           pending_applications=pending_applications)
+                           pending_applications=pending_applications,
+                           completed_applications=completed_applications,
+                           recent_apps=recent_apps)
+
+# ===================== ADMIN — SERVICE MANAGEMENT =====================
+
+@app.route('/manage/services')
+@admin_required
+def manage_services():
+    services = Service.query.all()
+    return render_template('admin/services.html', services=services)
+
+@app.route('/manage/services/add', methods=['POST'])
+@admin_required
+def add_service():
+    try:
+        title = request.form.get('title')
+        description = request.form.get('description')
+        schema_str = request.form.get('form_schema') 
+        docs_str = request.form.get('required_documents')
+        
+        if not title or not description:
+            flash('Title and description are required.', 'danger')
+            return redirect(url_for('manage_services'))
+            
+        if schema_str and schema_str.strip():
+            try:
+                json.loads(schema_str)
+            except Exception as e:
+                flash(f'Invalid JSON schema: {e}', 'danger')
+                return redirect(url_for('manage_services'))
+        else:
+            schema_str = None
+
+        if docs_str and docs_str.strip():
+            try:
+                json.loads(docs_str)
+            except:
+                docs_str = None
+        else:
+            docs_str = None
+            
+        new_service = Service(title=title, description=description, form_schema=schema_str, required_documents=docs_str)
+        db.session.add(new_service)
+        db.session.commit()
+        flash('New service added successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error adding service: {str(e)}', 'danger')
+        
+    return redirect(url_for('manage_services'))
+
+@app.route('/manage/services/<int:service_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_service(service_id):
+    service = Service.query.get_or_404(service_id)
+    
+    if request.method == 'POST':
+        service.title = request.form.get('title', service.title)
+        service.description = request.form.get('description', service.description)
+        service.icon_path = request.form.get('icon_path', service.icon_path)
+        
+        schema_str = request.form.get('form_schema')
+        if schema_str and schema_str.strip():
+            try:
+                json.loads(schema_str)
+                service.form_schema = schema_str
+            except:
+                flash('Invalid JSON for form schema.', 'danger')
+                return redirect(url_for('edit_service', service_id=service_id))
+        elif schema_str is not None:
+            service.form_schema = None
+        
+        docs_str = request.form.get('required_documents')
+        if docs_str and docs_str.strip():
+            try:
+                json.loads(docs_str)
+                service.required_documents = docs_str
+            except:
+                flash('Invalid JSON for required documents.', 'danger')
+                return redirect(url_for('edit_service', service_id=service_id))
+        elif docs_str is not None:
+            service.required_documents = None
+        
+        db.session.commit()
+        flash(f'Service "{service.title}" updated successfully.', 'success')
+        return redirect(url_for('manage_services'))
+    
+    # Parse for display
+    schema = []
+    if service.form_schema:
+        try:
+            schema = json.loads(service.form_schema)
+        except:
+            pass
+    doc_fields = []
+    if service.required_documents:
+        try:
+            doc_fields = json.loads(service.required_documents)
+        except:
+            pass
+    
+    return render_template('admin/edit_service.html', service=service, schema=schema, doc_fields=doc_fields)
+
+@app.route('/manage/services/<int:service_id>/delete', methods=['POST'])
+@admin_required
+def delete_service(service_id):
+    service = Service.query.get_or_404(service_id)
+    Application.query.filter_by(service_id=service.id).delete()
+    db.session.delete(service)
+    db.session.commit()
+    flash(f'Service {service.title} deleted successfully.', 'success')
+    return redirect(url_for('manage_services'))
+
+# ===================== ADMIN — APPLICATION MANAGEMENT =====================
 
 @app.route('/manage/applications')
 @admin_required
@@ -330,6 +548,61 @@ def manage_applications():
         
     return render_template('admin/applications.html', applications=parsed_apps, supabase=supabase)
 
+@app.route('/manage/applications/<int:app_id>')
+@admin_required
+def application_detail(app_id):
+    app_item = Application.query.get_or_404(app_id)
+    data = None
+    if app_item.submitted_data:
+        try:
+            data = json.loads(app_item.submitted_data)
+        except:
+            pass
+    
+    # Get all documents
+    user_docs = ApplicationDocument.query.filter_by(application_id=app_id, doc_type='request').all()
+    admin_docs = ApplicationDocument.query.filter_by(application_id=app_id, doc_type='response').all()
+    
+    # Generate signed URLs
+    user_doc_urls = []
+    for doc in user_docs:
+        url = None
+        if supabase:
+            try:
+                result = supabase.storage.from_('documents').create_signed_url(doc.filename, 60*60)
+                if result:
+                    url = result.get('signedURL')
+            except:
+                pass
+        user_doc_urls.append({'doc': doc, 'url': url})
+    
+    admin_doc_urls = []
+    for doc in admin_docs:
+        url = None
+        if supabase:
+            try:
+                result = supabase.storage.from_('documents').create_signed_url(doc.filename, 60*60)
+                if result:
+                    url = result.get('signedURL')
+            except:
+                pass
+        admin_doc_urls.append({'doc': doc, 'url': url})
+    
+    # Legacy single document
+    legacy_doc_url = None
+    if app_item.document_path and supabase:
+        try:
+            result = supabase.storage.from_('documents').create_signed_url(app_item.document_path, 60*60)
+            if result:
+                legacy_doc_url = result.get('signedURL')
+        except:
+            pass
+    
+    return render_template('admin/application_detail.html', 
+                           app=app_item, data=data, 
+                           user_docs=user_doc_urls, admin_docs=admin_doc_urls,
+                           legacy_doc_url=legacy_doc_url)
+
 @app.route('/manage/applications/<int:app_id>/status', methods=['POST'])
 @admin_required
 def admin_update_status(app_id):
@@ -344,77 +617,96 @@ def admin_update_status(app_id):
         
     db.session.commit()
     flash(f'Application #{app_id} status updated to {status}.', 'success')
+    
+    # Redirect back to detail page if came from there
+    if request.form.get('from_detail'):
+        return redirect(url_for('application_detail', app_id=app_id))
     return redirect(url_for('manage_applications'))
 
-@app.route('/manage/services')
+@app.route('/manage/applications/<int:app_id>/upload', methods=['POST'])
 @admin_required
-def manage_services():
-    services = Service.query.all()
-    return render_template('admin/services.html', services=services)
-
-@app.route('/manage/services/add', methods=['POST'])
-@admin_required
-def add_service():
-    try:
-        title = request.form.get('title')
-        description = request.form.get('description')
-        schema_str = request.form.get('form_schema') 
-        
-        if not title or not description:
-            flash('Title and description are required.', 'danger')
-            return redirect(url_for('manage_services'))
-            
-        if schema_str and schema_str.strip():
-            try:
-                json.loads(schema_str)
-            except Exception as e:
-                flash(f'Invalid JSON schema: {e}', 'danger')
-                return redirect(url_for('manage_services'))
-        else:
-            schema_str = None # Ensure it's None if blank
-            
-        new_service = Service(title=title, description=description, form_schema=schema_str)
-        db.session.add(new_service)
-        db.session.commit()
-        flash('New service added successfully.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error adding service: {str(e)}', 'danger')
-        print(f"DEBUG ERROR: {e}")
-        
-    return redirect(url_for('manage_services'))
-
-@app.route('/manage/services/<int:service_id>/delete', methods=['POST'])
-@admin_required
-def delete_service(service_id):
-    service = Service.query.get_or_404(service_id)
+def admin_upload_document(app_id):
+    """Admin uploads completed/updated documents for the user."""
+    app_item = Application.query.get_or_404(app_id)
     
-    Application.query.filter_by(service_id=service.id).delete()
-    db.session.delete(service)
-    db.session.commit()
-    flash(f'Service {service.title} deleted successfully.', 'success')
-    return redirect(url_for('manage_services'))
+    doc_label = request.form.get('doc_label', 'Updated Document')
+    
+    if 'admin_document' in request.files:
+        file = request.files['admin_document']
+        if file and file.filename != '':
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            fname = secure_filename(f"admin_{app_id}_{timestamp}_{file.filename}")
+            
+            if supabase:
+                try:
+                    file_bytes = file.read()
+                    supabase.storage.from_('documents').upload(
+                        path=fname,
+                        file=file_bytes,
+                        file_options={"content-type": file.content_type}
+                    )
+                    new_doc = ApplicationDocument(
+                        application_id=app_id,
+                        filename=fname,
+                        original_name=file.filename,
+                        doc_label=doc_label,
+                        uploaded_by='admin',
+                        doc_type='response'
+                    )
+                    db.session.add(new_doc)
+                    db.session.commit()
+                    flash(f'Document "{doc_label}" uploaded successfully for the user.', 'success')
+                except Exception as e:
+                    flash(f'Upload error: {str(e)}', 'danger')
+            else:
+                flash('Storage is not configured.', 'danger')
+    
+    return redirect(url_for('application_detail', app_id=app_id))
+
+# ===================== ADMIN — SETTINGS =====================
 
 @app.route('/manage/settings', methods=['GET', 'POST'])
 @admin_required
 def admin_settings():
     if request.method == 'POST':
-        old_pass = request.form.get('old_password')
-        new_pass = request.form.get('new_password')
+        action = request.form.get('action')
         
-        if not check_password_hash(current_user.password, old_pass):
-            flash('Incorrect current password.', 'danger')
-            return redirect(url_for('admin_settings'))
+        if action == 'update_password':
+            old_pass = request.form.get('old_password')
+            new_pass = request.form.get('new_password')
             
-        current_user.password = generate_password_hash(new_pass)
-        current_user.plain_password = new_pass
-        db.session.commit()
-        flash('Password updated successfully. It will be visible to the Administrator.', 'success')
-        return redirect(url_for('admin_settings'))
+            if not check_password_hash(current_user.password, old_pass):
+                flash('Incorrect current password.', 'danger')
+                return redirect(url_for('admin_settings'))
+                
+            current_user.password = generate_password_hash(new_pass)
+            current_user.plain_password = new_pass
+            db.session.commit()
+            flash('Password updated successfully.', 'success')
+            
+        elif action == 'update_site':
+            settings_keys = ['shop_name', 'shop_tagline', 'shop_address', 'shop_phone', 
+                           'shop_email', 'shop_map_url', 'shop_timings']
+            for key in settings_keys:
+                val = request.form.get(key)
+                if val is not None:
+                    set_setting(key, val)
+            db.session.commit()
+            flash('Site settings updated successfully.', 'success')
         
-    return render_template('admin/settings.html')
+        return redirect(url_for('admin_settings'))
+    
+    # Load current settings
+    settings = {}
+    try:
+        for s in SiteSetting.query.all():
+            settings[s.key] = s.value
+    except:
+        pass
+        
+    return render_template('admin/settings.html', settings=settings)
 
-# --- Superuser (Administrator) Exclusive Portal ---
+# ===================== SUPERUSER =====================
 
 @app.route('/superuser/login', methods=['GET', 'POST'])
 def superuser_login():
@@ -442,60 +734,76 @@ def superuser_dashboard():
     users = User.query.order_by(User.id.asc()).all()
     return render_template('admin/superuser_dashboard.html', users=users)
 
-# --- Database Initialization ---
+# ===================== DATABASE INIT =====================
+
 def init_db():
     with app.app_context():
-        # Drop and recreate for schema changes
         db.create_all()
         
+        # Seed default site settings if empty
+        if SiteSetting.query.count() == 0:
+            defaults = {
+                'shop_name': 'Faiz Internet',
+                'shop_tagline': 'Common Service Centre',
+                'shop_address': 'Maiz Bazar, Asara, Uttar Pradesh, India',
+                'shop_phone': '+91 9837957711',
+                'shop_email': 'contact@faizinternet.com',
+                'shop_timings': 'Mon - Sat: 9AM - 8PM',
+                'shop_map_url': 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3510.123456789!2d78.0!3d28.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDMwJzAwLjAiTiA3OMKwMDAnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890'
+            }
+            for k, v in defaults.items():
+                db.session.add(SiteSetting(key=k, value=v))
+            db.session.commit()
+        
         if Service.query.count() == 0:
-            # Seed services with specific dynamic fields
             services_data = [
                 {
                     'title': 'Aadhaar Card Services', 
-                    'desc': 'New Registration, Name Correction, Address Update, DOB Change',
-                    'icon': 'img/service-icon.png',
+                    'desc': 'Aadhaar Address Update, Aadhaar Download, Find Lost Aadhaar, Get Aadhaar without OTP',
+                    'icon': 'img/aadhaar_logo.jpg',
                     'schema': [
-                        {'name': 'applicant_name', 'label': 'Full Name as per records', 'type': 'text', 'required': True},
-                        {'name': 'aadhar_number', 'label': 'Aadhaar Number (Leave blank if New)', 'type': 'text', 'required': False},
-                        {'name': 'dob', 'label': 'Date of Birth', 'type': 'date', 'required': True},
-                        {'name': 'father_husband_name', 'label': 'Father/Husband Name', 'type': 'text', 'required': True},
-                        {'name': 'full_address', 'label': 'Complete Address Details', 'type': 'textarea', 'required': True},
-                        {'name': 'correction_details', 'label': 'Details of Correction needed', 'type': 'textarea', 'required': False}
+                        {'name': 'applicant_name', 'label': 'Full Name', 'type': 'text', 'required': True},
+                        {'name': 'aadhar_number', 'label': 'Aadhaar Number', 'type': 'text', 'required': False},
+                        {'name': 'service_type', 'label': 'Select Service', 'type': 'select', 'options': ['Address Update', 'Download Aadhaar', 'Find Lost Aadhaar', 'Aadhaar without OTP'], 'required': True}
+                    ],
+                    'docs': [
+                        {'label': 'Aadhaar Card Copy', 'required': True},
+                        {'label': 'Address Proof', 'required': False}
                     ]
                 },
                 {
                     'title': 'PAN Card Service', 
                     'desc': 'New PAN, Correction or Reprint',
-                    'icon': 'img/service-icon.png',
+                    'icon': 'img/csc_logo.jpg',
                     'schema': [
                         {'name': 'applicant_name', 'label': 'Full Name', 'type': 'text', 'required': True},
-                        {'name': 'pan_number', 'label': 'Existing PAN (if correction)', 'type': 'text', 'required': False},
-                        {'name': 'dob', 'label': 'Date of Birth', 'type': 'date', 'required': True},
-                        {'name': 'aadhar_link', 'label': 'Aadhaar Number to Link', 'type': 'text', 'required': True}
+                        {'name': 'pan_number', 'label': 'Existing PAN (if correction)', 'type': 'text', 'required': False}
+                    ],
+                    'docs': [
+                        {'label': 'ID Proof', 'required': True}
                     ]
                 },
                 {
-                    'title': 'Passport Service', 
-                    'desc': 'Fresh Passport, Re-issue, Police Clearance',
-                    'icon': 'img/service-icon.png',
-                    'schema': [
-                        {'name': 'applicant_name', 'label': 'Full Name', 'type': 'text', 'required': True},
-                        {'name': 'dob', 'label': 'Date of Birth', 'type': 'date', 'required': True},
-                        {'name': 'birth_place', 'label': 'Place of Birth', 'type': 'text', 'required': True},
-                        {'name': 'marital_status', 'label': 'Marital Status', 'type': 'text', 'required': True},
-                        {'name': 'education', 'label': 'Educational Qualification', 'type': 'text', 'required': True}
-                    ]
-                },
-                {
-                    'title': 'Income & Caste Certificate', 
-                    'desc': 'Apply for state level certificates',
-                    'icon': 'img/service-icon.png',
+                    'title': 'eDistrict Services', 
+                    'desc': 'Income, Caste, Domicile, Birth & Death Certificate',
+                    'icon': 'img/edistrict_logo.jpg',
                     'schema': [
                         {'name': 'applicant_name', 'label': 'Applicant Name', 'type': 'text', 'required': True},
-                        {'name': 'father_name', 'label': 'Father Name', 'type': 'text', 'required': True},
-                        {'name': 'annual_income', 'label': 'Total Annual Family Income', 'type': 'number', 'required': True},
-                        {'name': 'caste_category', 'label': 'Category (SC/ST/OBC/General)', 'type': 'text', 'required': True}
+                        {'name': 'certificate_type', 'label': 'Type of Certificate', 'type': 'text', 'required': True}
+                    ],
+                    'docs': [
+                        {'label': 'Supporting Documents', 'required': True}
+                    ]
+                },
+                {
+                    'title': 'Voter ID Services', 
+                    'desc': 'New Registration, Correction, EPIC Download',
+                    'icon': 'img/voter_logo.jpg',
+                    'schema': [
+                        {'name': 'applicant_name', 'label': 'Voter Name', 'type': 'text', 'required': True}
+                    ],
+                    'docs': [
+                        {'label': 'Photo ID Proof', 'required': True}
                     ]
                 }
             ]
@@ -505,14 +813,11 @@ def init_db():
                     title=s['title'], 
                     description=s['desc'], 
                     icon_path=s['icon'],
-                    form_schema=json.dumps(s['schema'])
+                    form_schema=json.dumps(s['schema']),
+                    required_documents=json.dumps(s.get('docs', []))
                 ))
             db.session.commit()
 
-# If running on Vercel, init_db shouldn't be called directly at the bottom 
-# to avoid concurrent execution issues, but for local dev we do it.
 if __name__ == '__main__':
-    # Initialize the database file upon start
     init_db()
-    
     app.run(debug=True, port=5000)

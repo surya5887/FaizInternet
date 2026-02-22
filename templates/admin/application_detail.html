@@ -1,0 +1,196 @@
+{% extends "admin_base.html" %}
+
+{% block page_title %}Application #{{ app.id }} — {{ app.service.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="{{ url_for('manage_applications') }}" class="btn btn-outline btn-sm">
+        <i class="fas fa-arrow-left"></i> Back to Applications
+    </a>
+    <span class="badge {{ app.status | lower }}">{{ app.status }}</span>
+</div>
+
+<!-- Client & Application Info -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+    <div class="detail-card">
+        <h3><i class="fas fa-user"></i> Client Information</h3>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Name</label>
+                <span>{{ app.applicant.name }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Phone</label>
+                <span>{{ app.applicant.phone }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Email</label>
+                <span>{{ app.applicant.email }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Application Type</label>
+                <span>{{ app.application_type }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <h3><i class="fas fa-file-signature"></i> Application Details</h3>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Service</label>
+                <span>{{ app.service.title }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Applied On</label>
+                <span>{{ app.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Ticket ID</label>
+                <span>#{{ "%05d" | format(app.id) }}</span>
+            </div>
+            <div class="detail-item">
+                <label>Status</label>
+                <span class="badge {{ app.status | lower }}">{{ app.status }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submitted Data -->
+{% if data %}
+<div class="detail-card">
+    <h3><i class="fas fa-clipboard-list"></i> Submitted Form Data</h3>
+    <div class="detail-grid">
+        {% for key, val in data.items() %}
+        <div class="detail-item">
+            <label>{{ key.replace('_', ' ') }}</label>
+            <span>{{ val or '—' }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- User Uploaded Documents -->
+<div class="detail-card">
+    <h3><i class="fas fa-cloud-upload-alt"></i> Documents from User</h3>
+    
+    {% if legacy_doc_url %}
+    <div class="doc-item">
+        <div class="doc-info">
+            <i class="fas fa-file-pdf"></i>
+            <div>
+                <div class="doc-name">Legacy Uploaded Document</div>
+                <div class="doc-label">Single file upload</div>
+            </div>
+        </div>
+        <a href="{{ legacy_doc_url }}" target="_blank" class="btn btn-sm btn-outline">
+            <i class="fas fa-download"></i> Download
+        </a>
+    </div>
+    {% endif %}
+    
+    {% if user_docs %}
+        {% for item in user_docs %}
+        <div class="doc-item">
+            <div class="doc-info">
+                <i class="fas fa-file-alt"></i>
+                <div>
+                    <div class="doc-name">{{ item.doc.doc_label or 'Document' }}</div>
+                    <div class="doc-label">{{ item.doc.original_name }} — {{ item.doc.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+            </div>
+            {% if item.url %}
+            <a href="{{ item.url }}" target="_blank" class="btn btn-sm btn-outline">
+                <i class="fas fa-download"></i> Download
+            </a>
+            {% else %}
+            <span class="badge user">No URL</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% elif not legacy_doc_url %}
+        <p style="color: var(--admin-text-dim); font-size: 0.9rem; padding: 20px 0; text-align: center;">
+            <i class="fas fa-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
+            No documents uploaded by user.
+        </p>
+    {% endif %}
+</div>
+
+<!-- Admin Uploaded Documents (Response) -->
+<div class="detail-card">
+    <h3><i class="fas fa-cloud-download-alt"></i> Admin Uploaded Documents (For User)</h3>
+    
+    {% if admin_docs %}
+        {% for item in admin_docs %}
+        <div class="doc-item">
+            <div class="doc-info">
+                <i class="fas fa-file-check" style="color: var(--admin-success);"></i>
+                <div>
+                    <div class="doc-name">{{ item.doc.doc_label or 'Response Document' }}</div>
+                    <div class="doc-label">{{ item.doc.original_name }} — {{ item.doc.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+            </div>
+            {% if item.url %}
+            <a href="{{ item.url }}" target="_blank" class="btn btn-sm btn-success">
+                <i class="fas fa-external-link-alt"></i> View
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--admin-text-dim); font-size: 0.9rem; padding: 10px 0; text-align: center;">
+            No response documents uploaded yet.
+        </p>
+    {% endif %}
+    
+    <!-- Upload Form -->
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
+        <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin-bottom: 12px;"><i class="fas fa-upload" style="margin-right: 6px;"></i> Upload completed/updated document for the user:</p>
+        <form method="POST" action="{{ url_for('admin_upload_document', app_id=app.id) }}" enctype="multipart/form-data">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                <div class="admin-form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                    <label>Document Label</label>
+                    <input type="text" name="doc_label" class="admin-form-control" placeholder="e.g. Updated Aadhaar Card" required>
+                </div>
+                <div class="admin-form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                    <label>File</label>
+                    <input type="file" name="admin_document" class="admin-form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required style="padding: 8px;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="height: 46px;">
+                    <i class="fas fa-paper-plane"></i> Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Status Update & Notes -->
+<div class="detail-card">
+    <h3><i class="fas fa-gavel"></i> Update Status & Notes</h3>
+    <form method="POST" action="{{ url_for('admin_update_status', app_id=app.id) }}">
+        <input type="hidden" name="from_detail" value="1">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+            <div class="admin-form-group">
+                <label>Status</label>
+                <select name="status" class="admin-form-control">
+                    <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>⏳ Pending</option>
+                    <option value="Processing" {% if app.status == 'Processing' %}selected{% endif %}>🔄 Processing</option>
+                    <option value="Completed" {% if app.status == 'Completed' %}selected{% endif %}>✅ Completed</option>
+                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>❌ Rejected</option>
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label>Admin Notes (visible to user)</label>
+                <input type="text" name="admin_notes" class="admin-form-control" value="{{ app.admin_notes or '' }}" placeholder="Write a message for the client...">
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i> Update Application
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

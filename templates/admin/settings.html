@@ -1,30 +1,77 @@
 {% extends "admin_base.html" %}
 
-{% block page_title %}Security Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
 
 {% block content %}
-<div class="table-container" style="max-width: 600px;">
-    <div class="table-header">
-        <h3 class="table-title">Update Admin Password</h3>
+<!-- Site Information -->
+<form method="POST">
+    <input type="hidden" name="action" value="update_site">
+    
+    <div class="settings-section">
+        <h3><i class="fas fa-store"></i> Shop / Site Information</h3>
+        <div class="settings-grid">
+            <div class="admin-form-group">
+                <label>Shop Name</label>
+                <input type="text" name="shop_name" class="admin-form-control" value="{{ settings.get('shop_name', 'Faiz Internet') }}" placeholder="Faiz Internet">
+            </div>
+            <div class="admin-form-group">
+                <label>Tagline / Subtitle</label>
+                <input type="text" name="shop_tagline" class="admin-form-control" value="{{ settings.get('shop_tagline', 'Common Service Centre') }}" placeholder="Common Service Centre">
+            </div>
+            <div class="admin-form-group">
+                <label>Phone Number</label>
+                <input type="text" name="shop_phone" class="admin-form-control" value="{{ settings.get('shop_phone', '') }}" placeholder="+91 98765 43210">
+            </div>
+            <div class="admin-form-group">
+                <label>Email Address</label>
+                <input type="email" name="shop_email" class="admin-form-control" value="{{ settings.get('shop_email', '') }}" placeholder="contact@faizinternet.com">
+            </div>
+            <div class="admin-form-group settings-full">
+                <label>Full Address</label>
+                <textarea name="shop_address" class="admin-form-control" rows="2" placeholder="Shop address...">{{ settings.get('shop_address', '') }}</textarea>
+            </div>
+            <div class="admin-form-group">
+                <label>Working Hours</label>
+                <input type="text" name="shop_timings" class="admin-form-control" value="{{ settings.get('shop_timings', '') }}" placeholder="Mon - Sat: 9AM - 8PM">
+            </div>
+            <div class="admin-form-group">
+                <label>Google Maps Embed URL</label>
+                <input type="url" name="shop_map_url" class="admin-form-control" value="{{ settings.get('shop_map_url', '') }}" placeholder="https://www.google.com/maps/embed?pb=...">
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Site Settings
+            </button>
+        </div>
     </div>
-    <div style="padding: 24px;">
-        <p style="color: var(--text-muted); margin-bottom: 20px;">Use this form to change your password. Note that changes will be visible to the Administrator (Anees Chaudhary).</p>
-        
-        <form method="POST">
+</form>
+
+<!-- Password Change -->
+<form method="POST">
+    <input type="hidden" name="action" value="update_password">
+    
+    <div class="settings-section">
+        <h3><i class="fas fa-key"></i> Change Admin Password</h3>
+        <p style="color: var(--admin-text-dim); margin-bottom: 20px; font-size: 0.85rem;">
+            <i class="fas fa-info-circle" style="margin-right: 4px;"></i>
+            Password changes will be visible to the Administrator (Anees Chaudhary).
+        </p>
+        <div class="settings-grid">
             <div class="admin-form-group">
                 <label>Current Password</label>
                 <input type="password" name="old_password" class="admin-form-control" required placeholder="Enter current password">
             </div>
-            
             <div class="admin-form-group">
                 <label>New Password</label>
                 <input type="password" name="new_password" class="admin-form-control" required placeholder="Enter new password">
             </div>
-            
-            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
-                Update Password <i class="fas fa-key"></i>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-lock"></i> Update Password
             </button>
-        </form>
+        </div>
     </div>
-</div>
+</form>
 {% endblock %}

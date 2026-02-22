@@ -1,0 +1,156 @@
+{% extends "admin_base.html" %}
+
+{% block page_title %}Edit Service — {{ service.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('manage_services') }}" class="btn btn-outline btn-sm">
+        <i class="fas fa-arrow-left"></i> Back to Services
+    </a>
+</div>
+
+<form method="POST" action="{{ url_for('edit_service', service_id=service.id) }}">
+    <!-- Basic Info -->
+    <div class="settings-section">
+        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+        <div class="settings-grid">
+            <div class="admin-form-group">
+                <label>Service Title</label>
+                <input type="text" name="title" class="admin-form-control" value="{{ service.title }}" required>
+            </div>
+            <div class="admin-form-group">
+                <label>Icon Path</label>
+                <input type="text" name="icon_path" class="admin-form-control" value="{{ service.icon_path }}" placeholder="img/service-icon.png">
+            </div>
+            <div class="admin-form-group settings-full">
+                <label>Description</label>
+                <textarea name="description" class="admin-form-control" rows="3" required>{{ service.description }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Fields Config -->
+    <div class="settings-section">
+        <h3><i class="fas fa-list-alt"></i> Form Fields (JSON Schema)</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
+            Define the fields users see when booking this service. Each field needs: <code style="color: var(--admin-accent);">name</code>, <code style="color: var(--admin-accent);">label</code>, <code style="color: var(--admin-accent);">type</code> (text/textarea/date/number), <code style="color: var(--admin-accent);">required</code> (true/false).
+        </p>
+        
+        {% if schema %}
+        <div style="margin-bottom: 15px;">
+            <p style="font-size: 0.8rem; color: var(--admin-accent2); margin-bottom: 10px;"><i class="fas fa-eye"></i> Current Fields Preview:</p>
+            <div class="detail-grid">
+                {% for field in schema %}
+                <div class="detail-item">
+                    <label>{{ field.label }}</label>
+                    <span>{{ field.type }} {% if field.required %}<i class="fas fa-asterisk" style="color: var(--admin-danger); font-size: 0.6rem;"></i>{% endif %}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="admin-form-group">
+            <label>Form Schema JSON</label>
+            <textarea name="form_schema" class="admin-form-control" rows="8" style="font-family: monospace; font-size: 0.85rem;">{{ service.form_schema or '' }}</textarea>
+        </div>
+    </div>
+
+    <!-- Required Documents Config -->
+    <div class="settings-section">
+        <h3><i class="fas fa-file-upload"></i> Required Document Uploads</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
+            Define what documents users must upload. Each entry needs: <code style="color: var(--admin-accent);">label</code> (e.g. "Aadhaar Copy"), <code style="color: var(--admin-accent);">required</code> (true/false). Admin can add as many fields as needed.
+        </p>
+        
+        {% if doc_fields %}
+        <div style="margin-bottom: 15px;">
+            <p style="font-size: 0.8rem; color: var(--admin-accent2); margin-bottom: 10px;"><i class="fas fa-eye"></i> Current Document Fields:</p>
+            {% for doc in doc_fields %}
+            <div class="doc-item">
+                <div class="doc-info">
+                    <i class="fas fa-file-alt"></i>
+                    <div>
+                        <div class="doc-name">{{ doc.label }}</div>
+                        <div class="doc-label">{% if doc.required %}Required{% else %}Optional{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="admin-form-group">
+            <label>Required Documents JSON</label>
+            <textarea name="required_documents" class="admin-form-control" rows="6" style="font-family: monospace; font-size: 0.85rem;">{{ service.required_documents or '' }}</textarea>
+            <p style="font-size: 0.78rem; color: var(--admin-text-dim); margin-top: 8px;">
+                Example: <code style="color: var(--admin-accent);">[{"label": "Aadhaar Card Copy", "required": true}, {"label": "Photo", "required": false}]</code>
+            </p>
+        </div>
+    </div>
+
+    <!-- Dynamic Form Builder Helper -->
+    <div class="settings-section">
+        <h3><i class="fas fa-magic"></i> Quick Document Field Builder</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
+            Use this tool to easily build document field configs without writing JSON manually.
+        </p>
+        
+        <div id="doc-builder">
+            <div id="doc-fields-list"></div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="addDocField()" style="margin-top: 10px;">
+                <i class="fas fa-plus"></i> Add Document Field
+            </button>
+            <button type="button" class="btn btn-success btn-sm" onclick="generateDocJSON()" style="margin-top: 10px;">
+                <i class="fas fa-code"></i> Generate JSON
+            </button>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+        <a href="{{ url_for('manage_services') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let docFieldCount = 0;
+
+function addDocField() {
+    docFieldCount++;
+    const container = document.getElementById('doc-fields-list');
+    const div = document.createElement('div');
+    div.style.cssText = 'display: flex; gap: 12px; align-items: center; margin-bottom: 10px; padding: 12px; background: rgba(139,92,246,0.04); border-radius: 10px; border: 1px solid rgba(139,92,246,0.08);';
+    div.innerHTML = `
+        <input type="text" placeholder="Document Label (e.g. Aadhaar Copy)" class="admin-form-control doc-label-input" style="flex: 1;">
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--admin-text-muted); white-space: nowrap; cursor: pointer; margin: 0;">
+            <input type="checkbox" class="doc-required-input" checked> Required
+        </label>
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(div);
+}
+
+function generateDocJSON() {
+    const labels = document.querySelectorAll('.doc-label-input');
+    const requireds = document.querySelectorAll('.doc-required-input');
+    const docs = [];
+    labels.forEach((input, i) => {
+        if (input.value.trim()) {
+            docs.push({label: input.value.trim(), required: requireds[i].checked});
+        }
+    });
+    const textarea = document.querySelector('textarea[name="required_documents"]');
+    textarea.value = JSON.stringify(docs, null, 2);
+    textarea.scrollIntoView({behavior: 'smooth', block: 'center'});
+    textarea.style.borderColor = '#10b981';
+    setTimeout(() => textarea.style.borderColor = '', 2000);
+}
+</script>
+{% endblock %}
