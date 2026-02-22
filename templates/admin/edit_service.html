@@ -31,83 +31,64 @@
 
     <!-- Form Fields Config -->
     <div class="settings-section">
-        <h3><i class="fas fa-list-alt"></i> Form Fields (JSON Schema)</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
-            Define the fields users see when booking this service. Each field needs: <code style="color: var(--admin-accent);">name</code>, <code style="color: var(--admin-accent);">label</code>, <code style="color: var(--admin-accent);">type</code> (text/textarea/date/number), <code style="color: var(--admin-accent);">required</code> (true/false).
+        <h3><i class="fas fa-list-alt"></i> Form Configuration (Check-box based)</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 20px;">
+            Add fields that users should fill while booking. Set field labels, types, and check "Required" for mandatory fields.
         </p>
         
-        {% if schema %}
-        <div style="margin-bottom: 15px;">
-            <p style="font-size: 0.8rem; color: var(--admin-accent2); margin-bottom: 10px;"><i class="fas fa-eye"></i> Current Fields Preview:</p>
-            <div class="detail-grid">
-                {% for field in schema %}
-                <div class="detail-item">
-                    <label>{{ field.label }}</label>
-                    <span>{{ field.type }} {% if field.required %}<i class="fas fa-asterisk" style="color: var(--admin-danger); font-size: 0.6rem;"></i>{% endif %}</span>
-                </div>
-                {% endfor %}
+        <div class="builder-section">
+            <div class="builder-header">
+                <div>Field Label (e.g. Full Name)</div>
+                <div>Type</div>
+                <div style="text-align: center;">Required?</div>
+                <div></div>
             </div>
+            <div id="form-fields-builder">
+                <!-- Rows injected by JS -->
+            </div>
+            <button type="button" class="btn-add-row" onclick="addFormFieldRow()">
+                <i class="fas fa-plus-circle"></i> Add New Field
+            </button>
         </div>
-        {% endif %}
-        
-        <div class="admin-form-group">
-            <label>Form Schema JSON</label>
-            <textarea name="form_schema" class="admin-form-control" rows="8" style="font-family: monospace; font-size: 0.85rem;">{{ service.form_schema or '' }}</textarea>
-        </div>
+
+        <details>
+            <summary style="font-size: 0.8rem; color: var(--admin-text-dim); cursor: pointer; margin-top: 10px;">Advanced: Edit Raw JSON Schema</summary>
+            <div class="admin-form-group" style="margin-top: 15px;">
+                <textarea id="form_schema_json" name="form_schema" class="admin-form-control" rows="5" style="font-family: monospace; font-size: 0.85rem;">{{ service.form_schema or '[]' }}</textarea>
+            </div>
+        </details>
     </div>
 
     <!-- Required Documents Config -->
     <div class="settings-section">
         <h3><i class="fas fa-file-upload"></i> Required Document Uploads</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
-            Define what documents users must upload. Each entry needs: <code style="color: var(--admin-accent);">label</code> (e.g. "Aadhaar Copy"), <code style="color: var(--admin-accent);">required</code> (true/false). Admin can add as many fields as needed.
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 20px;">
+            Specify which documents the user must upload.
         </p>
-        
-        {% if doc_fields %}
-        <div style="margin-bottom: 15px;">
-            <p style="font-size: 0.8rem; color: var(--admin-accent2); margin-bottom: 10px;"><i class="fas fa-eye"></i> Current Document Fields:</p>
-            {% for doc in doc_fields %}
-            <div class="doc-item">
-                <div class="doc-info">
-                    <i class="fas fa-file-alt"></i>
-                    <div>
-                        <div class="doc-name">{{ doc.label }}</div>
-                        <div class="doc-label">{% if doc.required %}Required{% else %}Optional{% endif %}</div>
-                    </div>
-                </div>
+
+        <div class="builder-section">
+            <div class="builder-header doc-builder-header">
+                <div>Document Name (e.g. Aadhaar Card)</div>
+                <div style="text-align: center;">Required?</div>
+                <div></div>
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div class="admin-form-group">
-            <label>Required Documents JSON</label>
-            <textarea name="required_documents" class="admin-form-control" rows="6" style="font-family: monospace; font-size: 0.85rem;">{{ service.required_documents or '' }}</textarea>
-            <p style="font-size: 0.78rem; color: var(--admin-text-dim); margin-top: 8px;">
-                Example: <code style="color: var(--admin-accent);">[{"label": "Aadhaar Card Copy", "required": true}, {"label": "Photo", "required": false}]</code>
-            </p>
-        </div>
-    </div>
-
-    <!-- Dynamic Form Builder Helper -->
-    <div class="settings-section">
-        <h3><i class="fas fa-magic"></i> Quick Document Field Builder</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 15px;">
-            Use this tool to easily build document field configs without writing JSON manually.
-        </p>
-        
-        <div id="doc-builder">
-            <div id="doc-fields-list"></div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="addDocField()" style="margin-top: 10px;">
-                <i class="fas fa-plus"></i> Add Document Field
-            </button>
-            <button type="button" class="btn btn-success btn-sm" onclick="generateDocJSON()" style="margin-top: 10px;">
-                <i class="fas fa-code"></i> Generate JSON
+            <div id="doc-fields-builder">
+                <!-- Rows injected by JS -->
+            </div>
+            <button type="button" class="btn-add-row" onclick="addDocFieldRow()">
+                <i class="fas fa-plus-circle"></i> Add New Document
             </button>
         </div>
+        
+        <details>
+            <summary style="font-size: 0.8rem; color: var(--admin-text-dim); cursor: pointer; margin-top: 10px;">Advanced: Edit Raw Documents JSON</summary>
+            <div class="admin-form-group" style="margin-top: 15px;">
+                <textarea id="required_docs_json" name="required_documents" class="admin-form-control" rows="5" style="font-family: monospace; font-size: 0.85rem;">{{ service.required_documents or '[]' }}</textarea>
+            </div>
+        </details>
     </div>
 
-    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+    <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
         <a href="{{ url_for('manage_services') }}" class="btn btn-outline">Cancel</a>
         <button type="submit" class="btn btn-primary">
             <i class="fas fa-save"></i> Save Changes
@@ -118,39 +99,101 @@
 
 {% block scripts %}
 <script>
-let docFieldCount = 0;
-
-function addDocField() {
-    docFieldCount++;
-    const container = document.getElementById('doc-fields-list');
-    const div = document.createElement('div');
-    div.style.cssText = 'display: flex; gap: 12px; align-items: center; margin-bottom: 10px; padding: 12px; background: rgba(139,92,246,0.04); border-radius: 10px; border: 1px solid rgba(139,92,246,0.08);';
-    div.innerHTML = `
-        <input type="text" placeholder="Document Label (e.g. Aadhaar Copy)" class="admin-form-control doc-label-input" style="flex: 1;">
-        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--admin-text-muted); white-space: nowrap; cursor: pointer; margin: 0;">
-            <input type="checkbox" class="doc-required-input" checked> Required
+// --- FORM FIELDS BUILDER ---
+function addFormFieldRow(data = {label: '', type: 'text', required: true}) {
+    const container = document.getElementById('form-fields-builder');
+    const row = document.createElement('div');
+    row.className = 'builder-row';
+    row.innerHTML = `
+        <input type="text" class="admin-form-control field-label" value="${data.label}" placeholder="e.g. Father's Name" oninput="syncFormJSON()">
+        <select class="admin-form-control field-type" onchange="syncFormJSON()">
+            <option value="text" ${data.type==='text'?'selected':''}>Text</option>
+            <option value="number" ${data.type==='number'?'selected':''}>Number</option>
+            <option value="date" ${data.type==='date'?'selected':''}>Date</option>
+            <option value="email" ${data.type==='email'?'selected':''}>Email</option>
+            <option value="textarea" ${data.type==='textarea'?'selected':''}>Text Area</option>
+        </select>
+        <label class="builder-check">
+            <input type="checkbox" class="field-req" ${data.required?'checked':''} onchange="syncFormJSON()">
         </label>
-        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
-            <i class="fas fa-trash"></i>
-        </button>
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncFormJSON();">
+            <i class="fas fa-times"></i>
+        </div>
     `;
-    container.appendChild(div);
+    container.appendChild(row);
 }
 
-function generateDocJSON() {
-    const labels = document.querySelectorAll('.doc-label-input');
-    const requireds = document.querySelectorAll('.doc-required-input');
-    const docs = [];
-    labels.forEach((input, i) => {
-        if (input.value.trim()) {
-            docs.push({label: input.value.trim(), required: requireds[i].checked});
+function syncFormJSON() {
+    const rows = document.querySelectorAll('#form-fields-builder .builder-row');
+    const schema = [];
+    rows.forEach(row => {
+        const label = row.querySelector('.field-label').value.trim();
+        if (label) {
+            const name = label.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            schema.push({
+                name: name,
+                label: label,
+                type: row.querySelector('.field-type').value,
+                required: row.querySelector('.field-req').checked
+            });
         }
     });
-    const textarea = document.querySelector('textarea[name="required_documents"]');
-    textarea.value = JSON.stringify(docs, null, 2);
-    textarea.scrollIntoView({behavior: 'smooth', block: 'center'});
-    textarea.style.borderColor = '#10b981';
-    setTimeout(() => textarea.style.borderColor = '', 2000);
+    document.getElementById('form_schema_json').value = JSON.stringify(schema, null, 2);
 }
+
+// --- DOCUMENT BUILDER ---
+function addDocFieldRow(data = {label: '', required: true}) {
+    const container = document.getElementById('doc-fields-builder');
+    const row = document.createElement('div');
+    row.className = 'builder-row doc-builder-row';
+    row.innerHTML = `
+        <input type="text" class="admin-form-control doc-label" value="${data.label}" placeholder="e.g. Aadhaar Card Front" oninput="syncDocJSON()">
+        <label class="builder-check">
+            <input type="checkbox" class="doc-req" ${data.required?'checked':''} onchange="syncDocJSON()">
+        </label>
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncDocJSON();">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function syncDocJSON() {
+    const rows = document.querySelectorAll('#doc-fields-builder .builder-row');
+    const docs = [];
+    rows.forEach(row => {
+        const label = row.querySelector('.doc-label').value.trim();
+        if (label) {
+            docs.push({
+                label: label,
+                required: row.querySelector('.doc-req').checked
+            });
+        }
+    });
+    document.getElementById('required_docs_json').value = JSON.stringify(docs, null, 2);
+}
+
+// --- INITIALIZE ---
+window.onload = function() {
+    // Lead Form Fields
+    try {
+        const currentForm = JSON.parse(document.getElementById('form_schema_json').value || '[]');
+        if (currentForm.length > 0) {
+            currentForm.forEach(item => addFormFieldRow(item));
+        } else {
+            addFormFieldRow({label: 'Full Name', type: 'text', required: true});
+        }
+    } catch(e) { console.error("Invalid Form JSON", e); }
+
+    // Load Docs
+    try {
+        const currentDocs = JSON.parse(document.getElementById('required_docs_json').value || '[]');
+        if (currentDocs.length > 0) {
+            currentDocs.forEach(item => addDocFieldRow(item));
+        } else {
+            addDocFieldRow({label: 'ID Proof', required: true});
+        }
+    } catch(e) { console.error("Invalid Doc JSON", e); }
+};
 </script>
 {% endblock %}

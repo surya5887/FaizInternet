@@ -79,8 +79,8 @@
             <h3><i class="fas fa-plus-circle" style="color: var(--admin-accent); margin-right: 8px;"></i> Deploy New Service</h3>
             <i class="fas fa-times close-btn" onclick="document.getElementById('addServiceModal').classList.remove('active')"></i>
         </div>
-        <form method="POST" action="{{ url_for('add_service') }}">
-            <div class="modal-body">
+        <form method="POST" action="{{ url_for('add_service') }}" id="addServiceForm">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div class="admin-form-group">
                     <label>Service Title</label>
                     <input type="text" name="title" class="admin-form-control" required placeholder="e.g. Passport Renewal">
@@ -89,13 +89,33 @@
                     <label>Short Description</label>
                     <textarea name="description" class="admin-form-control" rows="2" required placeholder="Brief detail about the service..."></textarea>
                 </div>
+                
+                <!-- Visual Form Builder -->
                 <div class="admin-form-group">
-                    <label>Form Schema (JSON Array)</label>
-                    <textarea name="form_schema" class="admin-form-control" rows="4" placeholder='[{"name": "applicant_name", "label": "Full Name", "type": "text", "required": true}]' style="font-family: monospace; font-size: 0.85rem;"></textarea>
+                    <label><i class="fas fa-list-ul"></i> Form Fields</label>
+                    <div class="builder-section" style="padding: 15px; background: rgba(0,0,0,0.2);">
+                        <div id="modal-form-fields">
+                            <!-- Rows -->
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addModalFieldRow()">
+                            <i class="fas fa-plus"></i> Add Field
+                        </button>
+                    </div>
+                    <textarea name="form_schema" id="modal_form_json" style="display:none;">[]</textarea>
                 </div>
-                <div class="admin-form-group" style="margin-bottom: 0;">
-                    <label>Required Documents (JSON Array)</label>
-                    <textarea name="required_documents" class="admin-form-control" rows="3" placeholder='[{"label": "ID Proof", "required": true}]' style="font-family: monospace; font-size: 0.85rem;"></textarea>
+
+                <!-- Visual Doc Builder -->
+                <div class="admin-form-group">
+                    <label><i class="fas fa-file-upload"></i> Required Documents</label>
+                    <div class="builder-section" style="padding: 15px; background: rgba(0,0,0,0.2);">
+                        <div id="modal-doc-fields">
+                            <!-- Rows -->
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addModalDocRow()">
+                            <i class="fas fa-plus"></i> Add Document
+                        </button>
+                    </div>
+                    <textarea name="required_documents" id="modal_doc_json" style="display:none;">[]</textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -105,4 +125,85 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addModalFieldRow(data = {label: '', type: 'text', required: true}) {
+    const container = document.getElementById('modal-form-fields');
+    const row = document.createElement('div');
+    row.className = 'builder-row';
+    row.style.gridTemplateColumns = "1fr 1fr 60px 40px";
+    row.innerHTML = `
+        <input type="text" class="admin-form-control m-field-label" value="${data.label}" placeholder="Label" oninput="syncModalJSON()">
+        <select class="admin-form-control m-field-type" onchange="syncModalJSON()">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="email">Email</option>
+            <option value="textarea">Text Area</option>
+        </select>
+        <label class="builder-check">
+            <input type="checkbox" class="m-field-req" ${data.required?'checked':''} onchange="syncModalJSON()">
+        </label>
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function addModalDocRow(data = {label: '', required: true}) {
+    const container = document.getElementById('modal-doc-fields');
+    const row = document.createElement('div');
+    row.className = 'builder-row';
+    row.style.gridTemplateColumns = "2fr 60px 40px";
+    row.innerHTML = `
+        <input type="text" class="admin-form-control m-doc-label" value="${data.label}" placeholder="Doc Name" oninput="syncModalJSON()">
+        <label class="builder-check">
+            <input type="checkbox" class="m-doc-req" ${data.required?'checked':''} onchange="syncModalJSON()">
+        </label>
+        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function syncModalJSON() {
+    // Sync Forms
+    const fRows = document.querySelectorAll('#modal-form-fields .builder-row');
+    const fSchema = [];
+    fRows.forEach(row => {
+        const label = row.querySelector('.m-field-label').value.trim();
+        if (label) {
+            fSchema.push({
+                name: label.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+                label: label,
+                type: row.querySelector('.m-field-type').value,
+                required: row.querySelector('.m-field-req').checked
+            });
+        }
+    });
+    document.getElementById('modal_form_json').value = JSON.stringify(fSchema);
+
+    // Sync Docs
+    const dRows = document.querySelectorAll('#modal-doc-fields .builder-row');
+    const dSchema = [];
+    dRows.forEach(row => {
+        const label = row.querySelector('.m-doc-label').value.trim();
+        if (label) {
+            dSchema.push({
+                label: label,
+                required: row.querySelector('.m-doc-req').checked
+            });
+        }
+    });
+    document.getElementById('modal_doc_json').value = JSON.stringify(dSchema);
+}
+
+// Initial rows
+addModalFieldRow({label: 'Full Name', type: 'text', required: true});
+addModalDocRow({label: 'ID Proof', required: true});
+</script>
 {% endblock %}
