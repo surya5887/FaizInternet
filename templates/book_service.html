@@ -162,6 +162,7 @@
                         {% if doc_field.get('sub_inputs') and doc_field.get('sub_inputs')|length > 0 %}
                             <!-- Multi-part Upload (e.g. Front & Back) -->
                             <div class="multi-upload-grid">
+                                {% set outer_loop_index = loop.index0 %}
                                 {% for sub_label in doc_field.get('sub_inputs') %}
                                 <div class="sub-input-group">
                                     <span class="sub-input-label">{{ sub_label }}</span>
@@ -171,7 +172,7 @@
                                         </div>
                                         <span class="upload-text-main">Choose File</span>
                                         <span class="upload-text-sub">or drag & drop</span>
-                                        <input type="file" name="doc_{{ loop.parent.index0 }}_{{ loop.index0 }}" 
+                                        <input type="file" name="doc_{{ outer_loop_index }}_{{ loop.index0 }}" 
                                                class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
                                                {% if doc_field.get('required') %}required{% endif %}
                                                onchange="handlePreview(this)">
