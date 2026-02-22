@@ -61,6 +61,7 @@
     box-sizing: border-box;
     font-family: 'Inter', 'Open Sans', sans-serif;
     scroll-behavior: smooth;
+    scroll-padding-top: 100px;
 }
 
 body {
