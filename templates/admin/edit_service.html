@@ -145,8 +145,11 @@ function syncFormJSON() {
 function addDocFieldRow(data = {label: '', required: true, sub_inputs: []}) {
     const container = document.getElementById('doc-fields-builder');
     const row = document.createElement('div');
-    row.className = 'builder-row-container'; // Wrapper for row + sub-inputs
+    row.className = 'builder-row-container';
     row.style.marginBottom = '20px';
+    
+    // Generate a unique ID for the sub-inputs container
+    const subContainerId = 'subs-' + Math.floor(Math.random() * 1000000);
     
     row.innerHTML = `
         <div class="builder-row doc-builder-row">
@@ -158,10 +161,10 @@ function addDocFieldRow(data = {label: '', required: true, sub_inputs: []}) {
                 <i class="fas fa-times"></i>
             </div>
         </div>
-        <div class="sub-inputs-container" id="subs-${Date.now()}">
+        <div class="sub-inputs-container" id="${subContainerId}">
             <!-- Sub-inputs will go here -->
         </div>
-        <button type="button" class="btn-add-sub" onclick="addSubInput('${row.querySelector('.sub-inputs-container').id}')">
+        <button type="button" class="btn-add-sub" onclick="addSubInput('${subContainerId}')">
             <i class="fas fa-plus"></i> Add Sub-Input (e.g. Front Side)
         </button>
     `;
@@ -169,7 +172,7 @@ function addDocFieldRow(data = {label: '', required: true, sub_inputs: []}) {
     
     // Load existing sub-inputs if any
     if (data.sub_inputs && data.sub_inputs.length > 0) {
-        data.sub_inputs.forEach(subLabel => addSubInput(row.querySelector('.sub-inputs-container').id, subLabel));
+        data.sub_inputs.forEach(subLabel => addSubInput(subContainerId, subLabel));
     }
 }
 

@@ -162,6 +162,8 @@ function addModalDocRow(data = {label: '', required: true, sub_inputs: []}) {
     row.style.background = 'rgba(255,255,255,0.03)';
     row.style.borderRadius = '10px';
     
+    const subContainerId = 'm-subs-' + Math.floor(Math.random() * 1000000);
+    
     row.innerHTML = `
         <div class="builder-row" style="grid-template-columns: 2fr 60px 40px; margin-bottom: 8px;">
             <input type="text" class="admin-form-control m-doc-label" value="${data.label}" placeholder="Doc Name" oninput="syncModalJSON()">
@@ -172,14 +174,14 @@ function addModalDocRow(data = {label: '', required: true, sub_inputs: []}) {
                 <i class="fas fa-times"></i>
             </div>
         </div>
-        <div class="sub-inputs-container" id="m-subs-${Date.now()}"></div>
-        <button type="button" class="btn-add-sub" onclick="addModalSubInput('${row.querySelector('.sub-inputs-container').id}')">
+        <div class="sub-inputs-container" id="${subContainerId}"></div>
+        <button type="button" class="btn-add-sub" onclick="addModalSubInput('${subContainerId}')">
             <i class="fas fa-plus"></i> Sub-Input (e.g. Back Side)
         </button>
     `;
     container.appendChild(row);
     if (data.sub_inputs) {
-        data.sub_inputs.forEach(val => addModalSubInput(row.querySelector('.sub-inputs-container').id, val));
+        data.sub_inputs.forEach(val => addModalSubInput(subContainerId, val));
     }
 }
 
