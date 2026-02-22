@@ -339,7 +339,7 @@ def book_service(service_id):
                                         application_id=new_app.id,
                                         filename=fname,
                                         original_name=file.filename,
-                                        doc_label=f"{doc_field['label']} - {sub_label}",
+                                        doc_label=f"{doc_field.get('label', 'Document')} - {sub_label}",
                                         uploaded_by='user',
                                         doc_type='request'
                                     )

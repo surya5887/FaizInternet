@@ -218,6 +218,10 @@
                         fileNameText.textContent = input.files[0].name;
                         container.style.borderColor = 'var(--accent-blue)';
                         container.style.background = 'rgba(0, 245, 212, 0.05)';
+                        container.querySelector('.upload-text-main').style.color = 'var(--white)';
+                        
+                        const errorMsg = container.querySelector('.validation-error-msg');
+                        if (errorMsg) errorMsg.remove();
                     } else {
                         previewArea.classList.remove('active');
                         container.style.borderColor = '';
@@ -243,6 +247,43 @@
                             handlePreview(input);
                         }
                     });
+                });
+
+                // Custom validation to highlight empty required file inputs visibly
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    let isValid = true;
+                    const requiredFiles = this.querySelectorAll('input.file-input-hidden[required]');
+                    
+                    requiredFiles.forEach(input => {
+                        if (input.files.length === 0) {
+                            isValid = false;
+                            const container = input.closest('.stylish-upload-container');
+                            
+                            container.style.borderColor = 'var(--accent-orange)';
+                            container.querySelector('.upload-text-main').style.color = 'var(--accent-orange)';
+                            
+                            if (!container.querySelector('.validation-error-msg')) {
+                                const errorText = document.createElement('div');
+                                errorText.className = 'validation-error-msg';
+                                errorText.style.color = 'var(--accent-orange)';
+                                errorText.style.fontSize = '0.85rem';
+                                errorText.style.marginTop = '10px';
+                                errorText.style.fontWeight = '600';
+                                errorText.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Please upload this document';
+                                container.appendChild(errorText);
+                            }
+                        }
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault(); // Stop submission
+                        
+                        // Scroll to first error
+                        const firstError = document.querySelector('.stylish-upload-container[style*="border-color: var(--accent-orange)"]');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
                 });
                 </script>
 
