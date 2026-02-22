@@ -174,7 +174,7 @@
                                         <span class="upload-text-sub">or drag & drop</span>
                                         <input type="file" name="doc_{{ outer_loop_index }}_{{ loop.index0 }}" 
                                                class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
-                                               {% if doc_field.get('required') %}required{% endif %}
+                                               {% if doc_field.get('required') %}data-required="true"{% endif %}
                                                onchange="handlePreview(this)">
                                         <div class="file-preview-area">
                                             <i class="fa-solid fa-circle-check"></i>
@@ -194,7 +194,7 @@
                                 <span class="upload-text-sub">PDF, JPG, or PNG (Max 16MB)</span>
                                 <input type="file" name="doc_field_{{ loop.index0 }}" 
                                        class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png"
-                                       {% if doc_field.get('required') %}required{% endif %}
+                                       {% if doc_field.get('required') %}data-required="true"{% endif %}
                                        onchange="handlePreview(this)">
                                 <div class="file-preview-area">
                                     <i class="fa-solid fa-circle-check"></i>
@@ -252,7 +252,7 @@
                 // Custom validation to highlight empty required file inputs visibly
                 document.querySelector('form').addEventListener('submit', function(e) {
                     let isValid = true;
-                    const requiredFiles = this.querySelectorAll('input.file-input-hidden[required]');
+                    const requiredFiles = this.querySelectorAll('input.file-input-hidden[data-required="true"]');
                     
                     requiredFiles.forEach(input => {
                         if (input.files.length === 0) {
