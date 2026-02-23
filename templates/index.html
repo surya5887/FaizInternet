@@ -59,9 +59,14 @@
 </section>
 
 <!-- Why Choose Us -->
+<style>
+    .why-bg-image {
+        background-image: url("{{ url_for('static', filename='img/shop.jpg') }}");
+    }
+</style>
 <section class="why-choose-section">
     <!-- Background Image with Fade Overlay -->
-    <div class="why-bg-image" style="background-image: url('{{ url_for('static', filename='img/shop.jpg') }}');"></div>
+    <div class="why-bg-image"></div>
     <div class="why-bg-overlay"></div>
     
     <div class="container why-inner">
@@ -98,9 +103,9 @@
 <!-- CTA Section -->
 <section class="cta-section" style="padding: 100px 0; text-align: center; position: relative;">
     <div class="container">
-        <div class="premium-card" style="background: linear-gradient(135deg, rgba(17,34,64,0.9) 0%, rgba(10,25,47,0.95) 100%); border: 1px solid rgba(100,255,218,0.2); position: relative; overflow: hidden;">
+        <div class="premium-card" style="background: linear-gradient(135deg, rgba(17, 34, 64, 0.9) 0%, rgba(10, 25, 47, 0.95) 100%); border: 1px solid rgba(100, 255, 218, 0.2); position: relative; overflow: hidden;">
             <!-- Background glow -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,102,0,0.15) 0%, transparent 60%); pointer-events: none;"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: radial-gradient(circle, rgba(255, 102, 0, 0.15) 0%, transparent 60%); pointer-events: none;"></div>
             
             <h2 style="font-size: 2.5rem; margin-bottom: 20px; position: relative; z-index: 2;">Ready to Get Started?</h2>
             <p style="color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px; position: relative; z-index: 2;">Visit Faiz Internet Common Service Centre today or register online to access our premium digital services securely and quickly.</p>
