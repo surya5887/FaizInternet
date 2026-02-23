@@ -101,36 +101,93 @@
                 <div class="admin-form-group">
                     <label>Service Icon (FontAwesome class)</label>
                     <input type="text" name="icon_path" id="add_icon_path" class="admin-form-control" required value="fa-solid fa-circle-info" placeholder="e.g. fa-solid fa-helmet-safety">
-                    <div class="icon-suggestions" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-helmet-safety')"><i class="fa-solid fa-helmet-safety"></i> Labour</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-id-card')"><i class="fa-solid fa-id-card"></i> Voter</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-address-card')"><i class="fa-solid fa-address-card"></i> PAN</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-fingerprint')"><i class="fa-solid fa-fingerprint"></i> Aadhaar</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-building-columns')"><i class="fa-solid fa-building-columns"></i> eDistrict</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-passport')"><i class="fa-solid fa-passport"></i> Passport</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-utensils')"><i class="fa-solid fa-utensils"></i> Ration</span>
-                        <span class="icon-tag" onclick="setIcon('fa-solid fa-camera-retro')"><i class="fa-solid fa-camera-retro"></i> Photo</span>
+                    
+                    <div style="margin-top: 12px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.75rem; color: var(--admin-text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Icon Library (Click to select)</p>
+                        <div class="icon-library-scroll" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px;">
+                            
+                            <!-- Documents & IDs -->
+                            <div>
+                                <small style="display: block; color: var(--admin-accent); margin-bottom: 8px; font-size: 0.7rem;">DOCUMENTS & IDs</small>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-id-card')"><i class="fa-solid fa-id-card"></i> Voter ID</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-fingerprint')"><i class="fa-solid fa-fingerprint"></i> Aadhaar</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-address-card')"><i class="fa-solid fa-address-card"></i> PAN Card</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-passport')"><i class="fa-solid fa-passport"></i> Passport</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-file-invoice')"><i class="fa-solid fa-file-invoice"></i> Cert/Invoice</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-file-pdf')"><i class="fa-solid fa-file-pdf"></i> PDF</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-print')"><i class="fa-solid fa-print"></i> Print</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-copy')"><i class="fa-solid fa-copy"></i> Xerox</span>
+                                </div>
+                            </div>
+
+                            <!-- Govt & Utility -->
+                            <div>
+                                <small style="display: block; color: var(--admin-accent2); margin-bottom: 8px; font-size: 0.7rem;">GOVT & UTILITIES</small>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-building-columns')"><i class="fa-solid fa-building-columns"></i> eDistrict</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-landmark')"><i class="fa-solid fa-landmark"></i> Municipal</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-helmet-safety')"><i class="fa-solid fa-helmet-safety"></i> Labour</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-lightbulb')"><i class="fa-solid fa-lightbulb"></i> Electricity</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-droplet')"><i class="fa-solid fa-droplet"></i> Water</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-utensils')"><i class="fa-solid fa-utensils"></i> Ration</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-scale-balanced')"><i class="fa-solid fa-scale-balanced"></i> Registry</span>
+                                </div>
+                            </div>
+
+                            <!-- Finance & Travel -->
+                            <div>
+                                <small style="display: block; color: #ffbe0b; margin-bottom: 8px; font-size: 0.7rem;">FINANCE & TRAVEL</small>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-indian-rupee-sign')"><i class="fa-solid fa-indian-rupee-sign"></i> Banking</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-credit-card')"><i class="fa-solid fa-credit-card"></i> Card</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-car')"><i class="fa-solid fa-car"></i> License</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-train')"><i class="fa-solid fa-train"></i> Train</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-bus')"><i class="fa-solid fa-bus"></i> Bus</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-plane')"><i class="fa-solid fa-plane"></i> Flight</span>
+                                </div>
+                            </div>
+
+                            <!-- Others -->
+                            <div>
+                                <small style="display: block; color: #f15bb5; margin-bottom: 8px; font-size: 0.7rem;">OTHERS</small>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-camera-retro')"><i class="fa-solid fa-camera-retro"></i> Photo</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-laptop')"><i class="fa-solid fa-laptop"></i> Online</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-mobile-screen-button')"><i class="fa-solid fa-mobile-screen-button"></i> Mobile</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-wifi')"><i class="fa-solid fa-wifi"></i> Wi-Fi</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-heart-pulse')"><i class="fa-solid fa-heart-pulse"></i> Health</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-baby')"><i class="fa-solid fa-baby"></i> Birth</span>
+                                    <span class="icon-tag" onclick="setIcon('fa-solid fa-cake-candles')"><i class="fa-solid fa-cake-candles"></i> Death</span>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
 
                 <style>
                     .icon-tag {
                         background: rgba(255,255,255,0.05);
-                        padding: 5px 10px;
-                        border-radius: 6px;
-                        font-size: 0.8rem;
+                        padding: 6px 12px;
+                        border-radius: 8px;
+                        font-size: 0.75rem;
                         cursor: pointer;
                         border: 1px solid rgba(255,255,255,0.1);
                         transition: all 0.2s;
                         display: flex;
                         align-items: center;
-                        gap: 5px;
+                        gap: 6px;
                     }
                     .icon-tag:hover {
                         background: var(--admin-accent);
-                        color: white;
+                        border-color: var(--admin-accent);
+                        color: white !important;
                     }
-                    .icon-tag i { font-size: 1rem; }
+                    .icon-tag i { font-size: 0.9rem; }
+                    
+                    .icon-library-scroll::-webkit-scrollbar { width: 4px; }
+                    .icon-library-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
                 </style>
                 
                 <div class="admin-form-group card-style" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
