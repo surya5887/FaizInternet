@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar -->
     <aside class="admin-sidebar" id="sidebar">
@@ -52,7 +54,12 @@
     <!-- Main Content -->
     <main class="admin-main">
         <header class="topbar">
-            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
             <div class="user-profile">
                 <span>{{ current_user.name }}</span>
                 <div class="avatar">{{ current_user.name[0] | upper }}</div>
@@ -78,5 +85,25 @@
     </main>
     
     {% block scripts %}{% endblock %}
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
+    </script>
 </body>
 </html>
