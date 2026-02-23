@@ -134,15 +134,6 @@ def service_detail(service_id):
     service = Service.query.get_or_404(service_id)
     return render_template('service_detail.html', service=service)
 
-@app.route('/debug-services')
-def debug_services():
-    services = Service.query.all()
-    out = "<h1>Services Debug</h1><ul>"
-    for s in services:
-        out += f"<li>ID: {s.id} | Title: '{s.title}' | Icon: '{s.icon_path}'</li>"
-    out += "</ul>"
-    return out
-
 # ===================== ADMIN DECORATORS =====================
 
 def admin_required(f):
@@ -219,6 +210,7 @@ def add_service():
     try:
         title = request.form.get('title')
         description = request.form.get('description')
+        icon_path = request.form.get('icon_path', 'fa-solid fa-circle-info')
         docs_new = request.form.get('docs_new')
         docs_update = request.form.get('docs_update')
         status_link = request.form.get('status_link')
@@ -227,7 +219,14 @@ def add_service():
             flash('Title and description are required.', 'danger')
             return redirect(url_for('manage_services'))
             
-        new_service = Service(title=title, description=description, docs_new=docs_new, docs_update=docs_update, status_link=status_link)
+        new_service = Service(
+            title=title, 
+            description=description, 
+            icon_path=icon_path,
+            docs_new=docs_new, 
+            docs_update=docs_update, 
+            status_link=status_link
+        )
         db.session.add(new_service)
         db.session.commit()
         flash('New service added successfully.', 'success')
@@ -389,6 +388,9 @@ def init_db():
             for s in curr_services:
                 if s.title in mapping and (s.icon_path.startswith('img/') or not s.icon_path.startswith('fa-')):
                     s.icon_path = mapping[s.title]
+                elif s.icon_path.startswith('img/'):
+                    # Default icon for any remaining broken image paths
+                    s.icon_path = 'fa-solid fa-circle-info'
             db.session.commit()
 
 # Ensure tables exist and database is initialized/migrated

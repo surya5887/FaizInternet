@@ -98,6 +98,41 @@
                     <textarea name="description" class="admin-form-control" rows="2" required placeholder="Brief detail about the service..."></textarea>
                 </div>
                 
+                <div class="admin-form-group">
+                    <label>Service Icon (FontAwesome class)</label>
+                    <input type="text" name="icon_path" id="add_icon_path" class="admin-form-control" required value="fa-solid fa-circle-info" placeholder="e.g. fa-solid fa-helmet-safety">
+                    <div class="icon-suggestions" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-helmet-safety')"><i class="fa-solid fa-helmet-safety"></i> Labour</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-id-card')"><i class="fa-solid fa-id-card"></i> Voter</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-address-card')"><i class="fa-solid fa-address-card"></i> PAN</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-fingerprint')"><i class="fa-solid fa-fingerprint"></i> Aadhaar</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-building-columns')"><i class="fa-solid fa-building-columns"></i> eDistrict</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-passport')"><i class="fa-solid fa-passport"></i> Passport</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-utensils')"><i class="fa-solid fa-utensils"></i> Ration</span>
+                        <span class="icon-tag" onclick="setIcon('fa-solid fa-camera-retro')"><i class="fa-solid fa-camera-retro"></i> Photo</span>
+                    </div>
+                </div>
+
+                <style>
+                    .icon-tag {
+                        background: rgba(255,255,255,0.05);
+                        padding: 5px 10px;
+                        border-radius: 6px;
+                        font-size: 0.8rem;
+                        cursor: pointer;
+                        border: 1px solid rgba(255,255,255,0.1);
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+                    .icon-tag:hover {
+                        background: var(--admin-accent);
+                        color: white;
+                    }
+                    .icon-tag i { font-size: 1rem; }
+                </style>
+                
                 <div class="admin-form-group card-style" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                     <label style="color: var(--admin-accent); font-weight: 600;">NEW APPLICATION Documents</label>
                     <textarea name="docs_new" class="admin-form-control" rows="4" placeholder="List documents needed for a fresh application (one per line)..."></textarea>
@@ -123,5 +158,11 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Script logic removed as simple text inputs are now used -->
+<script>
+    function setIcon(iconClass) {
+        document.getElementById('add_icon_path').value = iconClass;
+        // Optional: show a small toast or visual feedback
+        console.log('Icon set to: ' + iconClass);
+    }
+</script>
 {% endblock %}

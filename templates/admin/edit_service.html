@@ -19,9 +19,38 @@
                 <input type="text" name="title" class="admin-form-control" value="{{ service.title }}" required>
             </div>
             <div class="admin-form-group">
-                <label>Icon Path</label>
-                <input type="text" name="icon_path" class="admin-form-control" value="{{ service.icon_path }}" placeholder="img/service-icon.png">
+                <label>Icon Path (FontAwesome class) <i id="icon-preview" class="{{ service.icon_path }}" style="margin-left: 10px; color: var(--admin-accent); font-size: 1.2rem;"></i></label>
+                <input type="text" name="icon_path" id="icon_path_field" class="admin-form-control" value="{{ service.icon_path }}" placeholder="fa-solid fa-circle-info" oninput="updatePreview()">
+                <div class="icon-suggestions" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-helmet-safety')"><i class="fa-solid fa-helmet-safety"></i> Labour</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-id-card')"><i class="fa-solid fa-id-card"></i> Voter</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-address-card')"><i class="fa-solid fa-address-card"></i> PAN</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-fingerprint')"><i class="fa-solid fa-fingerprint"></i> Aadhaar</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-building-columns')"><i class="fa-solid fa-building-columns"></i> eDistrict</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-passport')"><i class="fa-solid fa-passport"></i> Passport</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-utensils')"><i class="fa-solid fa-utensils"></i> Ration</span>
+                    <span class="icon-tag" onclick="setIcon('fa-solid fa-camera-retro')"><i class="fa-solid fa-camera-retro"></i> Photo</span>
+                </div>
             </div>
+
+            <style>
+                .icon-tag {
+                    background: rgba(255,255,255,0.05);
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    font-size: 0.75rem;
+                    cursor: pointer;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                .icon-tag:hover {
+                    background: var(--admin-accent);
+                    color: white;
+                }
+            </style>
             <div class="admin-form-group settings-full">
                 <label>Description</label>
                 <textarea name="description" class="admin-form-control" rows="3" required>{{ service.description }}</textarea>
@@ -80,5 +109,17 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Legacy script logic removed as simple text inputs are now used -->
+<script>
+    function updatePreview() {
+        const iconField = document.getElementById('icon_path_field');
+        const preview = document.getElementById('icon-preview');
+        preview.className = iconField.value || 'fa-solid fa-circle-info';
+    }
+
+    function setIcon(iconClass) {
+        const iconField = document.getElementById('icon_path_field');
+        iconField.value = iconClass;
+        updatePreview();
+    }
+</script>
 {% endblock %}
