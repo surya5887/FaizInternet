@@ -11,9 +11,14 @@
         <div class="hero-content">
             <h2>Your <span>Gateway</span> to<br>Government Services</h2>
             <p>Fast, Reliable and Secure Solutions<br>for Digital & Government Services</p>
-            <div class="hero-buttons">
-                <a href="{{ url_for('services') }}" class="btn btn-primary">Explore Services</a>
-                <a href="{{ url_for('contact') }}" class="btn btn-secondary">Contact Us <i class="fa-solid fa-arrow-right" style="margin-left: 10px;"></i></a>
+            <div class="hero-status-check" style="margin-top: 40px; background: rgba(17, 27, 68, 0.7); backdrop-filter: blur(10px); padding: 20px; border-radius: var(--border-radius-md); border: 1px solid rgba(0, 245, 212, 0.2); box-shadow: var(--shadow-glow); text-align: left;">
+                <h4 style="color: var(--accent-blue); font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;"><i class="fa-solid fa-magnifying-glass"></i> Check Document Status</h4>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('check_status') }}" class="btn btn-primary" style="flex: 1; text-align: center; padding: 15px; font-size: 1.05rem;">
+                        Check Status <i class="fa-solid fa-arrow-down" style="margin-left: 10px;"></i>
+                    </a>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 15px; margin-bottom: 0;">* Need to check your Aadhar, PAN, or Passport status? Select your service below to get the direct official checking links.</p>
             </div>
         </div>
         <div class="hero-graphic">
@@ -23,7 +28,7 @@
 </section>
 
  <!-- Services Section -->
- <section class="services-section" style="padding: 100px 0; position: relative;">
+ <section id="services-section" class="services-section" style="padding: 100px 0; position: relative;">
     <div class="container">
        <div style="text-align: center; margin-bottom: 60px;">
             <h4 style="color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 15px;">What We Offer</h4>
@@ -43,7 +48,7 @@
                 </div>
                 <h3>{{ service.title }}</h3>
                 <p>{{ service.description }}</p>
-                <a href="{{ url_for('book_service', service_id=service.id) }}" class="btn-apply">Apply Now <i class="fa-solid fa-arrow-right-long"></i></a>
+                <a href="{{ url_for('service_detail', service_id=service.id) }}" class="btn-apply">View Details & Check Status <i class="fa-solid fa-arrow-right-long"></i></a>
             </div>
             {% endfor %}
         </div>
@@ -100,8 +105,8 @@
             <h2 style="font-size: 2.5rem; margin-bottom: 20px; position: relative; z-index: 2;">Ready to Get Started?</h2>
             <p style="color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px; position: relative; z-index: 2;">Visit Faiz Internet Common Service Centre today or register online to access our premium digital services securely and quickly.</p>
             <div style="position: relative; z-index: 2; display: flex; justify-content: center; gap: 20px;">
-                <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">Create Account</a>
-                <a href="{{ url_for('contact') }}" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem;">Get Directions</a>
+                <a href="{{ url_for('services') }}" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">Explore All Services</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem;">Get Directions / WhatsApp Us</a>
             </div>
         </div>
     </div>

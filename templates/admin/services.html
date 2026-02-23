@@ -7,7 +7,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Active Services</h3>
-            <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin: 4px 0 0 0;">Manage services, form fields, and document requirements.</p>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin: 4px 0 0 0;">Manage informational services, document requirements, and status links.</p>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('active')">
             <i class="fas fa-plus"></i> Add Service
@@ -20,8 +20,9 @@
                 <tr>
                     <th>ID</th>
                     <th>Service Info</th>
-                    <th>Form Fields</th>
-                    <th>Doc Fields</th>
+                    <th>New App Docs</th>
+                    <th>Update Docs</th>
+                    <th>Status Link</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -34,17 +35,24 @@
                         <span style="color: var(--admin-text-muted); font-size: 0.82rem;">{{ svc.description[:80] }}{% if svc.description|length > 80 %}...{% endif %}</span>
                     </td>
                     <td>
-                        {% if svc.form_schema %}
-                            <span class="badge success"><i class="fas fa-code"></i> Active</span>
+                        {% if svc.docs_new %}
+                            <span class="badge success">Configured</span>
                         {% else %}
-                            <span class="badge user">None</span>
+                            <span class="badge user">Empty</span>
                         {% endif %}
                     </td>
                     <td>
-                        {% if svc.required_documents %}
-                            <span class="badge admin"><i class="fas fa-file-upload"></i> Configured</span>
+                        {% if svc.docs_update %}
+                            <span class="badge success">Configured</span>
                         {% else %}
-                            <span class="badge user">None</span>
+                            <span class="badge user">Empty</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if svc.status_link %}
+                            <a href="{{ svc.status_link }}" target="_blank" style="color: var(--admin-accent); font-size: 0.8rem; text-decoration: underline;">Open Link</a>
+                        {% else %}
+                            <span style="color: var(--admin-text-muted);">None</span>
                         {% endif %}
                     </td>
                     <td>
@@ -52,7 +60,7 @@
                             <a href="{{ url_for('edit_service', service_id=svc.id) }}" class="btn btn-sm btn-outline">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <form method="POST" action="{{ url_for('delete_service', service_id=svc.id) }}" onsubmit="return confirm('Delete this service? All associated applications will also be deleted.');">
+                            <form method="POST" action="{{ url_for('delete_service', service_id=svc.id) }}" onsubmit="return confirm('Delete this service?');">
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -62,7 +70,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
                         No services found. Add one to get started.
                     </td>
                 </tr>
@@ -79,7 +87,7 @@
             <h3><i class="fas fa-plus-circle" style="color: var(--admin-accent); margin-right: 8px;"></i> Deploy New Service</h3>
             <i class="fas fa-times close-btn" onclick="document.getElementById('addServiceModal').classList.remove('active')"></i>
         </div>
-        <form method="POST" action="{{ url_for('add_service') }}" id="addServiceForm">
+        <form method="POST" action="{{ url_for('add_service') }}">
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div class="admin-form-group">
                     <label>Service Title</label>
@@ -90,32 +98,19 @@
                     <textarea name="description" class="admin-form-control" rows="2" required placeholder="Brief detail about the service..."></textarea>
                 </div>
                 
-                <!-- Visual Form Builder -->
-                <div class="admin-form-group">
-                    <label><i class="fas fa-list-ul"></i> Form Fields</label>
-                    <div class="builder-section" style="padding: 15px; background: rgba(0,0,0,0.2);">
-                        <div id="modal-form-fields">
-                            <!-- Rows -->
-                        </div>
-                        <button type="button" class="btn-add-row" onclick="addModalFieldRow()">
-                            <i class="fas fa-plus"></i> Add Field
-                        </button>
-                    </div>
-                    <textarea name="form_schema" id="modal_form_json" style="display:none;">[]</textarea>
+                <div class="admin-form-group card-style" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <label style="color: var(--admin-accent); font-weight: 600;">NEW APPLICATION Documents</label>
+                    <textarea name="docs_new" class="admin-form-control" rows="4" placeholder="List documents needed for a fresh application (one per line)..."></textarea>
                 </div>
 
-                <!-- Visual Doc Builder -->
+                <div class="admin-form-group card-style" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <label style="color: var(--admin-accent2); font-weight: 600;">UPDATE / CORRECTION Documents</label>
+                    <textarea name="docs_update" class="admin-form-control" rows="4" placeholder="List docs for changes/corrections..."></textarea>
+                </div>
+
                 <div class="admin-form-group">
-                    <label><i class="fas fa-file-upload"></i> Required Documents</label>
-                    <div class="builder-section" style="padding: 15px; background: rgba(0,0,0,0.2);">
-                        <div id="modal-doc-fields">
-                            <!-- Rows -->
-                        </div>
-                        <button type="button" class="btn-add-row" onclick="addModalDocRow()">
-                            <i class="fas fa-plus"></i> Add Document
-                        </button>
-                    </div>
-                    <textarea name="required_documents" id="modal_doc_json" style="display:none;">[]</textarea>
+                    <label>Official Government Status URL</label>
+                    <input type="url" name="status_link" class="admin-form-control" placeholder="https://portal.gov.in/status">
                 </div>
             </div>
             <div class="modal-footer">
@@ -128,116 +123,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-function addModalFieldRow(data = {label: '', type: 'text', required: true}) {
-    const container = document.getElementById('modal-form-fields');
-    const row = document.createElement('div');
-    row.className = 'builder-row';
-    row.style.gridTemplateColumns = "1fr 1fr 60px 40px";
-    row.innerHTML = `
-        <input type="text" class="admin-form-control m-field-label" value="${data.label}" placeholder="Label" oninput="syncModalJSON()">
-        <select class="admin-form-control m-field-type" onchange="syncModalJSON()">
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-            <option value="date">Date</option>
-            <option value="email">Email</option>
-            <option value="textarea">Text Area</option>
-        </select>
-        <label class="builder-check">
-            <input type="checkbox" class="m-field-req" ${data.required?'checked':''} onchange="syncModalJSON()">
-        </label>
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
-            <i class="fas fa-times"></i>
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function addModalDocRow(data = {label: '', required: true, sub_inputs: []}) {
-    const container = document.getElementById('modal-doc-fields');
-    const row = document.createElement('div');
-    row.className = 'm-builder-row-container';
-    row.style.marginBottom = '15px';
-    row.style.padding = '10px';
-    row.style.background = 'rgba(255,255,255,0.03)';
-    row.style.borderRadius = '10px';
-    
-    const subContainerId = 'm-subs-' + Math.floor(Math.random() * 1000000);
-    
-    row.innerHTML = `
-        <div class="builder-row" style="grid-template-columns: 2fr 60px 40px; margin-bottom: 8px;">
-            <input type="text" class="admin-form-control m-doc-label" value="${data.label}" placeholder="Doc Name" oninput="syncModalJSON()">
-            <label class="builder-check">
-                <input type="checkbox" class="m-doc-req" ${data.required?'checked':''} onchange="syncModalJSON()">
-            </label>
-            <div class="builder-remove" onclick="this.parentElement.parentElement.remove(); syncModalJSON();" style="width:30px; height:30px;">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
-        <div class="sub-inputs-container" id="${subContainerId}"></div>
-        <button type="button" class="btn-add-sub" onclick="addModalSubInput('${subContainerId}')">
-            <i class="fas fa-plus"></i> Sub-Input (e.g. Back Side)
-        </button>
-    `;
-    container.appendChild(row);
-    if (data.sub_inputs) {
-        data.sub_inputs.forEach(val => addModalSubInput(subContainerId, val));
-    }
-}
-
-function addModalSubInput(containerId, value = '') {
-    const container = document.getElementById(containerId);
-    const div = document.createElement('div');
-    div.className = 'sub-input-row';
-    div.innerHTML = `
-        <input type="text" class="admin-form-control m-sub-label" value="${value}" placeholder="Sub-label (e.g. Front)" oninput="syncModalJSON()" style="flex: 1;">
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncModalJSON();" style="width: 25px; height: 25px; font-size: 0.7rem;">
-            <i class="fas fa-times"></i>
-        </div>
-    `;
-    container.appendChild(div);
-    syncModalJSON();
-}
-
-function syncModalJSON() {
-    // Sync Forms
-    const fRows = document.querySelectorAll('#modal-form-fields .builder-row');
-    const fSchema = [];
-    fRows.forEach(row => {
-        const label = row.querySelector('.m-field-label').value.trim();
-        if (label) {
-            fSchema.push({
-                name: label.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-                label: label,
-                type: row.querySelector('.m-field-type').value,
-                required: row.querySelector('.m-field-req').checked
-            });
-        }
-    });
-    document.getElementById('modal_form_json').value = JSON.stringify(fSchema);
-
-    // Sync Docs
-    const dContainers = document.querySelectorAll('#modal-doc-fields .m-builder-row-container');
-    const dSchema = [];
-    dContainers.forEach(cont => {
-        const label = cont.querySelector('.m-doc-label').value.trim();
-        if (label) {
-            const subs = [];
-            cont.querySelectorAll('.m-sub-label').forEach(s => {
-                if (s.value.trim()) subs.push(s.value.trim());
-            });
-            dSchema.push({
-                label: label,
-                required: cont.querySelector('.m-doc-req').checked,
-                sub_inputs: subs
-            });
-        }
-    });
-    document.getElementById('modal_doc_json').value = JSON.stringify(dSchema);
-}
-
-// Initial rows
-addModalFieldRow({label: 'Full Name', type: 'text', required: true});
-addModalDocRow({label: 'ID Proof', required: true, sub_inputs: ['Front Side', 'Back Side']});
-</script>
+<!-- Script logic removed as simple text inputs are now used -->
 {% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.title }} — Faiz Internet{% endblock %}
+
+{% block content %}
+<div class="page-header" style="padding: 120px 0 60px; background: linear-gradient(180deg, rgba(10, 10, 18, 0.9) 0%, rgba(10, 10, 18, 1) 100%); text-align: center;">
+    <div class="container">
+        <div style="width: 80px; height: 80px; background: rgba(0, 114, 255, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
+            {% if service.icon_path.startswith('img/') %}
+            <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}" style="width: 45px; height: 45px; object-fit: contain;">
+            {% else %}
+            <i class="{{ service.icon_path }}" style="font-size: 2rem; color: var(--accent-blue);"></i>
+            {% endif %}
+        </div>
+        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 15px; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ service.title }}</h1>
+        <p style="color: var(--text-light); max-width: 700px; margin: 0 auto; font-size: 1.1rem; line-height: 1.6;">{{ service.description }}</p>
+    </div>
+</div>
+
+<section style="padding: 60px 0 100px;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1000px; margin: 0 auto;">
+            
+            <!-- Documents for New Registration -->
+            <div class="premium-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 35px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--accent-blue), #0056b3);"></div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: rgba(0, 245, 212, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-file-circle-plus" style="color: var(--accent-teal); font-size: 1.1rem;"></i>
+                    </div>
+                    <h3 style="color: var(--white); font-size: 1.2rem; font-weight: 700; margin: 0;">New Registration</h3>
+                </div>
+                {% if service.docs_new %}
+                <div style="color: var(--text-light); font-size: 0.95rem; line-height: 1.8;">
+                    {% for line in service.docs_new.split('\n') %}
+                        {% if line.strip() %}
+                        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                            <i class="fa-solid fa-check" style="color: var(--accent-teal); margin-top: 4px; font-size: 0.8rem;"></i>
+                            <span>{{ line.strip() }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: var(--text-light); opacity: 0.6; font-style: italic; margin: 0;">No documents listed yet. Contact us for details.</p>
+                {% endif %}
+            </div>
+
+            <!-- Documents for Correction / Update -->
+            <div class="premium-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 35px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6600, #ff9900);"></div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: rgba(255, 102, 0, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-pen-to-square" style="color: #ff9900; font-size: 1.1rem;"></i>
+                    </div>
+                    <h3 style="color: var(--white); font-size: 1.2rem; font-weight: 700; margin: 0;">Correction / Update</h3>
+                </div>
+                {% if service.docs_update %}
+                <div style="color: var(--text-light); font-size: 0.95rem; line-height: 1.8;">
+                    {% for line in service.docs_update.split('\n') %}
+                        {% if line.strip() %}
+                        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                            <i class="fa-solid fa-check" style="color: #ff9900; margin-top: 4px; font-size: 0.8rem;"></i>
+                            <span>{{ line.strip() }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: var(--text-light); opacity: 0.6; font-style: italic; margin: 0;">No documents listed yet. Contact us for details.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Check Status Link -->
+        {% if service.status_link %}
+        <div style="max-width: 1000px; margin: 30px auto 0; text-align: center;">
+            <a href="{{ service.status_link }}" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 40px; font-size: 1.05rem; border-radius: 12px; background: linear-gradient(135deg, var(--accent-blue) 0%, #0056b3 100%);">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Check Official Status
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- WhatsApp Inquiry Form -->
+        <div style="max-width: 600px; margin: 50px auto 0;">
+            <div class="premium-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 40px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #25D366, #128C7E);"></div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3 style="color: var(--white); font-size: 1.4rem; font-weight: 700; margin-bottom: 8px;">
+                        <i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> Inquire via WhatsApp
+                    </h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Fill the details below and we'll receive your query instantly.</p>
+                </div>
+
+                <div id="whatsapp-form">
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; color: var(--text-light); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">Your Name <span style="color: #ff4d4d;">*</span></label>
+                        <input type="text" id="wa-name" placeholder="Enter your full name" required style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.95rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='rgba(37,211,102,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; color: var(--text-light); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">Mobile Number</label>
+                        <input type="tel" id="wa-mobile" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Enter 10-digit mobile number" style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.95rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='rgba(37,211,102,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; color: var(--text-light); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">About Your Query</label>
+                        <textarea id="wa-query" rows="3" placeholder="Briefly describe what you need help with..." style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.95rem; outline: none; resize: vertical; transition: border-color 0.3s; font-family: inherit;" onfocus="this.style.borderColor='rgba(37,211,102,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+                    </div>
+
+                    <button onclick="sendWhatsApp()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s, box-shadow 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37,211,102,0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> Send on WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function sendWhatsApp() {
+    const nameInput = document.getElementById('wa-name');
+    const mobileInput = document.getElementById('wa-mobile');
+    const name = nameInput.value.trim();
+    const mobile = mobileInput.value.trim();
+    const query = document.getElementById('wa-query').value.trim();
+    const service = "{{ service.title }}";
+    
+    if (!name) {
+        alert("Please enter your name.");
+        nameInput.focus();
+        return;
+    }
+    
+    if (mobile && mobile.length !== 10) {
+        alert("Please enter a valid 10-digit mobile number.");
+        mobileInput.focus();
+        return;
+    }
+    
+    let message = `Hello Faiz Internet,\n\n`;
+    message += `*Service:* ${service}\n`;
+    if (name) message += `*Name:* ${name}\n`;
+    if (mobile) message += `*Mobile:* ${mobile}\n`;
+    if (query) message += `*Query:* ${query}\n`;
+    message += `\nPlease help me with this service. Thank you!`;
+    
+    const encoded = encodeURIComponent(message);
+    const phone = "{{ site.get('shop_phone', '+919756520529') | replace(' ', '') | replace('+91 ', '+91') }}";
+    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+    window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, '_blank');
+}
+</script>
+
+<style>
+    @media (max-width: 768px) {
+        .container > div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -4,45 +4,7 @@
 
 {% block content %}
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Total Users</p>
-            <h3>{{ total_users }}</h3>
-        </div>
-        <div class="stat-icon primary">
-            <i class="fas fa-users"></i>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Pending</p>
-            <h3>{{ pending_applications }}</h3>
-        </div>
-        <div class="stat-icon warning">
-            <i class="fas fa-hourglass-half"></i>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Completed</p>
-            <h3>{{ completed_applications }}</h3>
-        </div>
-        <div class="stat-icon success">
-            <i class="fas fa-check-circle"></i>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Total Applications</p>
-            <h3>{{ total_applications }}</h3>
-        </div>
-        <div class="stat-icon info">
-            <i class="fas fa-file-signature"></i>
-        </div>
-    </div>
+    <!-- Removed user and application stats for WhatsApp pivot -->
     
     <div class="stat-card">
         <div class="stat-info">
@@ -62,50 +24,10 @@
     </div>
     <div style="padding: 24px;">
         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-            <a href="{{ url_for('manage_applications') }}" class="btn btn-primary"><i class="fas fa-file-alt"></i> Process Applications</a>
             <a href="{{ url_for('manage_services') }}" class="btn btn-outline"><i class="fas fa-plus"></i> Manage Services</a>
             <a href="{{ url_for('admin_settings') }}" class="btn btn-outline"><i class="fas fa-sliders-h"></i> Site Settings</a>
         </div>
     </div>
 </div>
 
-<!-- Recent Applications -->
-{% if recent_apps %}
-<div class="table-container">
-    <div class="table-header">
-        <h3 class="table-title">Recent Applications</h3>
-        <a href="{{ url_for('manage_applications') }}" class="btn btn-sm btn-outline">View All</a>
-    </div>
-    <div style="overflow-x: auto;">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Client</th>
-                    <th>Service</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in recent_apps %}
-                <tr>
-                    <td><strong style="color: var(--admin-accent);">#{{ app.id }}</strong></td>
-                    <td style="font-weight: 600; color: var(--admin-white);">{{ app.applicant.name }}</td>
-                    <td>{{ app.service.title }}</td>
-                    <td><span class="badge {{ app.status | lower }}">{{ app.status }}</span></td>
-                    <td style="color: var(--admin-text-dim); font-size: 0.85rem;">{{ app.created_at.strftime('%d %b %Y') }}</td>
-                    <td>
-                        <a href="{{ url_for('application_detail', app_id=app.id) }}" class="btn btn-sm btn-outline">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
 {% endblock %}

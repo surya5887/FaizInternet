@@ -22,9 +22,7 @@
             <a href="{{ url_for('manage_dashboard') }}" class="nav-item {% if request.endpoint == 'manage_dashboard' %}active{% endif %}">
                 <i class="fas fa-chart-pie"></i> Dashboard
             </a>
-            <a href="{{ url_for('manage_applications') }}" class="nav-item {% if request.endpoint in ['manage_applications', 'application_detail'] %}active{% endif %}">
-                <i class="fas fa-file-alt"></i> Applications
-            </a>
+
             <a href="{{ url_for('manage_services') }}" class="nav-item {% if request.endpoint in ['manage_services', 'edit_service'] %}active{% endif %}">
                 <i class="fas fa-cogs"></i> Service Manager
             </a>

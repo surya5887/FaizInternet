@@ -29,63 +29,45 @@
         </div>
     </div>
 
-    <!-- Form Fields Config -->
+    <!-- Service Requirements -->
     <div class="settings-section">
-        <h3><i class="fas fa-list-alt"></i> Form Configuration (Check-box based)</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 20px;">
-            Add fields that users should fill while booking. Set field labels, types, and check "Required" for mandatory fields.
+        <h3><i class="fas fa-file-invoice" style="color: var(--admin-accent);"></i> Document Requirements & Official Links</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 25px; line-height: 1.6;">
+            Define the list of documents shown to users. Use one line per document for best readability. These will be displayed as a list on the service details page.
         </p>
         
-        <div class="builder-section">
-            <div class="builder-header">
-                <div>Field Label (e.g. Full Name)</div>
-                <div>Type</div>
-                <div style="text-align: center;">Required?</div>
-                <div></div>
+        <div class="settings-grid">
+            <div class="admin-form-group settings-full" style="background: rgba(0,0,0,0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <label style="color: var(--admin-accent); display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <i class="fas fa-plus-circle"></i> Requirements for **NEW APPLICATION**
+                </label>
+                <textarea name="docs_new" class="admin-form-control" rows="6" placeholder="Example:
+- Aadhaar Card
+- PAN Card
+- Photo
+- Birth Certificate">{{ service.docs_new or '' }}</textarea>
+                <p style="font-size: 0.75rem; color: var(--admin-text-muted); margin-top: 8px;">List documents required for a fresh application.</p>
             </div>
-            <div id="form-fields-builder">
-                <!-- Rows injected by JS -->
+
+            <div class="admin-form-group settings-full" style="background: rgba(0,0,0,0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-top: 15px;">
+                <label style="color: var(--admin-accent2); display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <i class="fas fa-edit"></i> Requirements for **UPDATE / CORRECTION**
+                </label>
+                <textarea name="docs_update" class="admin-form-control" rows="6" placeholder="Example:
+- Old Document Copy
+- Proof of Correction
+- Valid ID Proof">{{ service.docs_update or '' }}</textarea>
+                <p style="font-size: 0.75rem; color: var(--admin-text-muted); margin-top: 8px;">List documents required for changes or corrections.</p>
             </div>
-            <button type="button" class="btn-add-row" onclick="addFormFieldRow()">
-                <i class="fas fa-plus-circle"></i> Add New Field
-            </button>
+
+            <div class="admin-form-group settings-full" style="margin-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                    <i class="fas fa-external-link-alt"></i> Official Government Status Link
+                </label>
+                <input type="url" name="status_link" class="admin-form-control" value="{{ service.status_link or '' }}" placeholder="https://ssc.nic.in/Portal/CheckStatus">
+                <p style="font-size: 0.75rem; color: var(--admin-text-muted); margin-top: 6px;">URL where users can directly check their application status (optional).</p>
+            </div>
         </div>
-
-        <details>
-            <summary style="font-size: 0.8rem; color: var(--admin-text-dim); cursor: pointer; margin-top: 10px;">Advanced: Edit Raw JSON Schema</summary>
-            <div class="admin-form-group" style="margin-top: 15px;">
-                <textarea id="form_schema_json" name="form_schema" class="admin-form-control" rows="5" style="font-family: monospace; font-size: 0.85rem;">{{ service.form_schema or '[]' }}</textarea>
-            </div>
-        </details>
-    </div>
-
-    <!-- Required Documents Config -->
-    <div class="settings-section">
-        <h3><i class="fas fa-file-upload"></i> Required Document Uploads</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-dim); margin-bottom: 20px;">
-            Specify which documents the user must upload.
-        </p>
-
-        <div class="builder-section">
-            <div class="builder-header doc-builder-header">
-                <div>Document Name (e.g. Aadhaar Card)</div>
-                <div style="text-align: center;">Required?</div>
-                <div></div>
-            </div>
-            <div id="doc-fields-builder">
-                <!-- Rows injected by JS -->
-            </div>
-            <button type="button" class="btn-add-row" onclick="addDocFieldRow()">
-                <i class="fas fa-plus-circle"></i> Add New Document
-            </button>
-        </div>
-        
-        <details>
-            <summary style="font-size: 0.8rem; color: var(--admin-text-dim); cursor: pointer; margin-top: 10px;">Advanced: Edit Raw Documents JSON</summary>
-            <div class="admin-form-group" style="margin-top: 15px;">
-                <textarea id="required_docs_json" name="required_documents" class="admin-form-control" rows="5" style="font-family: monospace; font-size: 0.85rem;">{{ service.required_documents or '[]' }}</textarea>
-            </div>
-        </details>
     </div>
 
     <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
@@ -98,140 +80,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-// --- FORM FIELDS BUILDER ---
-function addFormFieldRow(data = {label: '', type: 'text', required: true}) {
-    const container = document.getElementById('form-fields-builder');
-    const row = document.createElement('div');
-    row.className = 'builder-row';
-    row.innerHTML = `
-        <input type="text" class="admin-form-control field-label" value="${data.label}" placeholder="e.g. Father's Name" oninput="syncFormJSON()">
-        <select class="admin-form-control field-type" onchange="syncFormJSON()">
-            <option value="text" ${data.type==='text'?'selected':''}>Text</option>
-            <option value="number" ${data.type==='number'?'selected':''}>Number</option>
-            <option value="date" ${data.type==='date'?'selected':''}>Date</option>
-            <option value="email" ${data.type==='email'?'selected':''}>Email</option>
-            <option value="textarea" ${data.type==='textarea'?'selected':''}>Text Area</option>
-        </select>
-        <label class="builder-check">
-            <input type="checkbox" class="field-req" ${data.required?'checked':''} onchange="syncFormJSON()">
-        </label>
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncFormJSON();">
-            <i class="fas fa-times"></i>
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function syncFormJSON() {
-    const rows = document.querySelectorAll('#form-fields-builder .builder-row');
-    const schema = [];
-    rows.forEach(row => {
-        const label = row.querySelector('.field-label').value.trim();
-        if (label) {
-            const name = label.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            schema.push({
-                name: name,
-                label: label,
-                type: row.querySelector('.field-type').value,
-                required: row.querySelector('.field-req').checked
-            });
-        }
-    });
-    document.getElementById('form_schema_json').value = JSON.stringify(schema, null, 2);
-}
-
-// --- DOCUMENT BUILDER ---
-function addDocFieldRow(data = {label: '', required: true, sub_inputs: []}) {
-    const container = document.getElementById('doc-fields-builder');
-    const row = document.createElement('div');
-    row.className = 'builder-row-container';
-    row.style.marginBottom = '20px';
-    
-    // Generate a unique ID for the sub-inputs container
-    const subContainerId = 'subs-' + Math.floor(Math.random() * 1000000);
-    
-    row.innerHTML = `
-        <div class="builder-row doc-builder-row">
-            <input type="text" class="admin-form-control doc-label" value="${data.label}" placeholder="e.g. Aadhaar Card" oninput="syncDocJSON()">
-            <label class="builder-check">
-                <input type="checkbox" class="doc-req" ${data.required?'checked':''} onchange="syncDocJSON()">
-            </label>
-            <div class="builder-remove" onclick="this.parentElement.parentElement.remove(); syncDocJSON();">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
-        <div class="sub-inputs-container" id="${subContainerId}">
-            <!-- Sub-inputs will go here -->
-        </div>
-        <button type="button" class="btn-add-sub" onclick="addSubInput('${subContainerId}')">
-            <i class="fas fa-plus"></i> Add Sub-Input (e.g. Front Side)
-        </button>
-    `;
-    container.appendChild(row);
-    
-    // Load existing sub-inputs if any
-    if (data.sub_inputs && data.sub_inputs.length > 0) {
-        data.sub_inputs.forEach(subLabel => addSubInput(subContainerId, subLabel));
-    }
-}
-
-function addSubInput(containerId, value = '') {
-    const container = document.getElementById(containerId);
-    const div = document.createElement('div');
-    div.className = 'sub-input-row';
-    div.innerHTML = `
-        <input type="text" class="admin-form-control sub-input-label" value="${value}" placeholder="Input Label (e.g. Back Side)" oninput="syncDocJSON()" style="flex: 1;">
-        <div class="builder-remove" onclick="this.parentElement.remove(); syncDocJSON();" style="width: 25px; height: 25px; font-size: 0.7rem;">
-            <i class="fas fa-times"></i>
-        </div>
-    `;
-    container.appendChild(div);
-    syncDocJSON();
-}
-
-function syncDocJSON() {
-    const containers = document.querySelectorAll('#doc-fields-builder .builder-row-container');
-    const docs = [];
-    containers.forEach(container => {
-        const label = container.querySelector('.doc-label').value.trim();
-        if (label) {
-            const subInputs = [];
-            container.querySelectorAll('.sub-input-label').forEach(sub => {
-                if (sub.value.trim()) subInputs.push(sub.value.trim());
-            });
-            
-            docs.push({
-                label: label,
-                required: container.querySelector('.doc-req').checked,
-                sub_inputs: subInputs
-            });
-        }
-    });
-    document.getElementById('required_docs_json').value = JSON.stringify(docs, null, 2);
-}
-
-// --- INITIALIZE ---
-window.onload = function() {
-    // Lead Form Fields
-    try {
-        const currentForm = JSON.parse(document.getElementById('form_schema_json').value || '[]');
-        if (currentForm.length > 0) {
-            currentForm.forEach(item => addFormFieldRow(item));
-        } else {
-            addFormFieldRow({label: 'Full Name', type: 'text', required: true});
-        }
-    } catch(e) { console.error("Invalid Form JSON", e); }
-
-    // Load Docs
-    try {
-        const currentDocs = JSON.parse(document.getElementById('required_docs_json').value || '[]');
-        if (currentDocs.length > 0) {
-            currentDocs.forEach(item => addDocFieldRow(item));
-        } else {
-            addDocFieldRow({label: 'ID Proof', required: true});
-        }
-    } catch(e) { console.error("Invalid Doc JSON", e); }
-};
-</script>
+<!-- Legacy script logic removed as simple text inputs are now used -->
 {% endblock %}
