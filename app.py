@@ -382,13 +382,13 @@ def init_db():
                     s.icon_path = mapping[s.title]
             db.session.commit()
 
-# Ensure tables exist on Vercel (create_all is safe to call multiple times)
+# Ensure tables exist and database is initialized/migrated
 with app.app_context():
     try:
         db.create_all()
+        init_db() # Run seeding and migrations
     except Exception:
         pass
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, port=5000)
