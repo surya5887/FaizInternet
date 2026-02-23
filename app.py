@@ -352,13 +352,34 @@ def init_db():
         
         if Service.query.count() == 0:
             services_data = [
-                ('Aadhaar Card Services', 'Aadhaar Address Update, Aadhaar Download, Find Lost Aadhaar, Get Aadhaar without OTP', 'img/aadhaar_logo.jpg'),
-                ('PAN Card Service', 'New PAN, Correction or Reprint', 'img/csc_logo.jpg'),
-                ('eDistrict Services', 'Income, Caste, Domicile, Birth & Death Certificate', 'img/edistrict_logo.jpg'),
-                ('Voter ID Services', 'New Registration, Correction, EPIC Download', 'img/voter_logo.jpg'),
+                ('Labour Card', 'Apply New Labour Card, Renewal Labour Card', 'fa-solid fa-helmet-safety'),
+                ('Voter ID Services', 'New Registration, Correction, EPIC Download', 'fa-solid fa-id-card'),
+                ('PAN Card Service', 'New PAN, Correction or Reprint', 'fa-solid fa-address-card'),
+                ('Aadhaar Card Services', 'Aadhaar Address Update, Aadhaar Download, Find Lost Aadhaar, Get Aadhaar without OTP', 'fa-solid fa-fingerprint'),
+                ('eDistrict Services', 'Income, Caste, Domicile, Birth & Death Certificate', 'fa-solid fa-building-columns'),
+                ('Passport', 'New Passport, Police Clearance, Correction', 'fa-solid fa-passport'),
+                ('Ration Card', 'New Ration Card, Name Add/Delete, Download', 'fa-solid fa-utensils'),
+                ('Color Photo and More', 'Passport Photos, Photostat, Lamination', 'fa-solid fa-camera-retro')
             ]
             for title, desc, icon in services_data:
                 db.session.add(Service(title=title, description=desc, icon_path=icon))
+            db.session.commit()
+        else:
+            # Migration: Update existing broken image paths to icons
+            curr_services = Service.query.all()
+            mapping = {
+                'Labour Card': 'fa-solid fa-helmet-safety',
+                'Voter ID Services': 'fa-solid fa-id-card',
+                'PAN Card Service': 'fa-solid fa-address-card',
+                'Aadhaar Card Services': 'fa-solid fa-fingerprint',
+                'eDistrict Services': 'fa-solid fa-building-columns',
+                'Passport': 'fa-solid fa-passport',
+                'Ration Card': 'fa-solid fa-utensils',
+                'Color Photo and More': 'fa-solid fa-camera-retro'
+            }
+            for s in curr_services:
+                if s.title in mapping and (s.icon_path.startswith('img/') or not s.icon_path.startswith('fa-')):
+                    s.icon_path = mapping[s.title]
             db.session.commit()
 
 # Ensure tables exist on Vercel (create_all is safe to call multiple times)
