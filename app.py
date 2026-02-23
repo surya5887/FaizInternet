@@ -343,6 +343,22 @@ def admin_settings():
                     set_setting(key, val)
             db.session.commit()
             flash('Site settings updated successfully.', 'success')
+            
+        elif action == 'update_account':
+            new_name = request.form.get('admin_name')
+            new_email = request.form.get('admin_email')
+            
+            # Check if email is being changed and if it's already taken
+            if new_email != current_user.email:
+                existing_user = User.query.filter_by(email=new_email).first()
+                if existing_user:
+                    flash('This email address is already in use.', 'danger')
+                    return redirect(url_for('admin_settings'))
+            
+            current_user.name = new_name
+            current_user.email = new_email
+            db.session.commit()
+            flash('Account information updated successfully.', 'success')
         
         return redirect(url_for('admin_settings'))
     

@@ -47,6 +47,30 @@
     </div>
 </form>
 
+<!-- Account Settings -->
+<form method="POST">
+    <input type="hidden" name="action" value="update_account">
+    
+    <div class="settings-section">
+        <h3><i class="fas fa-user-shield"></i> Account Settings</h3>
+        <div class="settings-grid">
+            <div class="admin-form-group">
+                <label>Admin Name</label>
+                <input type="text" name="admin_name" class="admin-form-control" value="{{ current_user.name }}" required>
+            </div>
+            <div class="admin-form-group">
+                <label>Login Email Address</label>
+                <input type="email" name="admin_email" class="admin-form-control" value="{{ current_user.email }}" required>
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-id-card"></i> Update Account Info
+            </button>
+        </div>
+    </div>
+</form>
+
 <!-- Password Change -->
 <form method="POST">
     <input type="hidden" name="action" value="update_password">
