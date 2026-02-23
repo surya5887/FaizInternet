@@ -26,6 +26,9 @@
             <a href="{{ url_for('manage_services') }}" class="nav-item {% if request.endpoint in ['manage_services', 'edit_service'] %}active{% endif %}">
                 <i class="fas fa-cogs"></i> Service Manager
             </a>
+            <a href="{{ url_for('manage_messages') }}" class="nav-item {% if request.endpoint == 'manage_messages' %}active{% endif %}">
+                <i class="fas fa-envelope"></i> Messages Inbox
+            </a>
             <a href="{{ url_for('admin_settings') }}" class="nav-item {% if request.endpoint == 'admin_settings' %}active{% endif %}">
                 <i class="fas fa-sliders-h"></i> Settings
             </a>

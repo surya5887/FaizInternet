@@ -48,17 +48,28 @@
         
         <div class="premium-card premium-form" style="flex: 1; min-width: 300px;">
             <h2 style="color: var(--white); margin-bottom: 30px;">Send a Message</h2>
-            <form>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 15px; border-radius: 10px; margin-bottom: 20px; background: {% if category == 'success' %}rgba(100, 255, 218, 0.1){% else %}rgba(255, 102, 0, 0.1){% endif %}; color: {% if category == 'success' %}var(--accent-blue){% else %}var(--accent-orange){% endif %}; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('contact') }}">
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Your Name" required>
+                    <input type="text" name="name" class="form-control" placeholder="Your Name" required>
                 </div>
                 <div class="form-group">
-                    <input type="email" class="form-control" placeholder="Your Email" required>
+                    <input type="email" name="email" class="form-control" placeholder="Your Email" required>
                 </div>
                 <div class="form-group">
-                    <textarea class="form-control" placeholder="Your Message" style="min-height: 150px; resize: vertical;" required></textarea>
+                    <textarea name="message" class="form-control" placeholder="Your Message" style="min-height: 150px; resize: vertical;" required></textarea>
                 </div>
-                <button type="button" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
             </form>
         </div>
     </div>

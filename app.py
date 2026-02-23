@@ -64,6 +64,14 @@ class SiteSetting(db.Model):
     key = db.Column(db.String(100), unique=True, nullable=False)
     value = db.Column(db.Text, nullable=True)
 
+class ContactMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
 # ===================== HELPERS =====================
 
 @login_manager.user_loader
@@ -120,8 +128,28 @@ def services():
     services = Service.query.all()
     return render_template('services.html', services=services)
 
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message_body = request.form.get('message')
+        
+        if not name or not email or not message_body:
+            flash('All fields are required.', 'danger')
+            return redirect(url_for('contact'))
+            
+        try:
+            new_msg = ContactMessage(name=name, email=email, message=message_body)
+            db.session.add(new_msg)
+            db.session.commit()
+            flash('Thank you for your message! We will get back to you soon.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred: {str(e)}', 'danger')
+            
+        return redirect(url_for('contact'))
+        
     return render_template('contact.html')
 
 @app.route('/check-status')
@@ -192,11 +220,30 @@ def admin_logout():
 @admin_required
 def manage_dashboard():
     total_services = Service.query.count()
-    
-    return render_template('admin/dashboard.html', 
-                           total_services=total_services)
+    unread_messages = ContactMessage.query.filter_by(is_read=False).count()
+    return render_template('admin/dashboard.html', total_services=total_services, unread_messages=unread_messages)
 
 # ===================== ADMIN — SERVICE MANAGEMENT =====================
+
+@app.route('/manage/messages')
+@admin_required
+def manage_messages():
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    # Mark all as read when visiting inbox
+    unread = ContactMessage.query.filter_by(is_read=False).all()
+    for m in unread:
+        m.is_read = True
+    db.session.commit()
+    return render_template('admin/messages.html', messages=messages)
+
+@app.route('/manage/messages/<int:msg_id>/delete', methods=['POST'])
+@admin_required
+def delete_message(msg_id):
+    msg = ContactMessage.query.get_or_404(msg_id)
+    db.session.delete(msg)
+    db.session.commit()
+    flash('Message deleted.', 'success')
+    return redirect(url_for('manage_messages'))
 
 @app.route('/manage/services')
 @admin_required
