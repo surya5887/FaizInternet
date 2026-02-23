@@ -439,6 +439,15 @@ def init_db():
                     # Default icon for any remaining broken image paths
                     s.icon_path = 'fa-solid fa-circle-info'
             db.session.commit()
+            
+        # Migration: Update 'Usman Ali' to 'Mohd Usman'
+        try:
+            old_user = User.query.filter_by(name='Usman Ali').first()
+            if old_user:
+                old_user.name = 'Mohd Usman'
+                db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 # Ensure tables exist and database is initialized/migrated
 with app.app_context():
