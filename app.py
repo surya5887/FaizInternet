@@ -134,6 +134,15 @@ def service_detail(service_id):
     service = Service.query.get_or_404(service_id)
     return render_template('service_detail.html', service=service)
 
+@app.route('/debug-services')
+def debug_services():
+    services = Service.query.all()
+    out = "<h1>Services Debug</h1><ul>"
+    for s in services:
+        out += f"<li>ID: {s.id} | Title: '{s.title}' | Icon: '{s.icon_path}'</li>"
+    out += "</ul>"
+    return out
+
 # ===================== ADMIN DECORATORS =====================
 
 def admin_required(f):
