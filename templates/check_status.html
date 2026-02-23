@@ -22,10 +22,10 @@
                 
                 <div>
                     <div class="status-icon" style="width: 60px; height: 60px; background: rgba(0, 114, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                        {% if service.icon_path.startswith('img/') %}
+                        {% if service.icon_path and service.icon_path.startswith('img/') %}
                         <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}" style="width: 35px; height: 35px; object-fit: contain;">
                         {% else %}
-                        <i class="{{ service.icon_path }}" style="font-size: 1.8rem; color: var(--accent-blue);"></i>
+                        <i class="{{ service.icon_path or 'fa-solid fa-circle-info' }}" style="font-size: 1.8rem; color: var(--accent-blue);"></i>
                         {% endif %}
                     </div>
                     <h3 style="font-size: 1.4rem; font-weight: 700; color: white; margin-bottom: 12px;">{{ service.title }}</h3>
