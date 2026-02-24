@@ -46,6 +46,7 @@ body {
     background: linear-gradient(180deg, #12122b 0%, #1a1a3e 100%);
     position: fixed;
     height: 100vh;
+    height: 100dvh;
     left: 0;
     top: 0;
     display: flex;
@@ -824,15 +825,25 @@ select.admin-form-control option {
 @media (max-width: 768px) {
 
     body {
-        max-height: 100vh;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
     }
+
     .mobile-toggle { display: flex; }
     .admin-sidebar { 
         transform: translateX(-100%);
         box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+        height: 100vh;
+        height: 100dvh;
     }
     .admin-sidebar.active { transform: translateX(0); }
-    .admin-main { margin-left: 0; }
+    .admin-main { 
+        margin-left: 0;
+        height: 100vh;
+        height: 100dvh;
+        overflow-y: auto;
+    }
     
     .topbar { height: 60px; }
     .page-title { font-size: 1rem; }
