@@ -822,6 +822,11 @@ select.admin-form-control option {
 }
 
 @media (max-width: 768px) {
+
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
     .mobile-toggle { display: flex; }
     .admin-sidebar { 
         transform: translateX(-100%);
