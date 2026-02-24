@@ -825,7 +825,6 @@ select.admin-form-control option {
 
     body {
         height: 100vh;
-        overflow: hidden;
     }
     .mobile-toggle { display: flex; }
     .admin-sidebar { 
